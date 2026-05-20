@@ -3,7 +3,7 @@
   "short_name": "NamaHam",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ede3cc",
+  "background_color": "#000000",
   "theme_color": "#ede3cc",
   "icons": [
     {"src": "NamaHam192.png", "sizes": "192x192", "type": "image/png"},
