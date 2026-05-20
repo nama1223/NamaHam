@@ -1,5 +1,6 @@
 export interface Theme {
   name: string;
+  nameEn: string;
   kind: 'light' | 'dark';
   headerBg: string;
   footerBg: string;
@@ -15,6 +16,7 @@ export interface Theme {
 export const THEMES: Theme[] = [
   {
     name: 'クリーム',
+    nameEn: 'Cream',
     kind: 'light',
     headerBg: '#ede3cc',
     footerBg: '#7a4f28',
@@ -28,6 +30,7 @@ export const THEMES: Theme[] = [
   },
   {
     name: 'スカイ',
+    nameEn: 'Sky',
     kind: 'light',
     headerBg: '#d4e5f0',
     footerBg: '#1a5e88',
@@ -41,6 +44,7 @@ export const THEMES: Theme[] = [
   },
   {
     name: 'ミント',
+    nameEn: 'Mint',
     kind: 'light',
     headerBg: '#cceadb',
     footerBg: '#1e6b42',
@@ -54,6 +58,7 @@ export const THEMES: Theme[] = [
   },
   {
     name: 'ネイビー',
+    nameEn: 'Navy',
     kind: 'dark',
     headerBg: '#1c2d42',
     footerBg: '#0c1e35',
@@ -67,6 +72,7 @@ export const THEMES: Theme[] = [
   },
   {
     name: 'フォレスト',
+    nameEn: 'Forest',
     kind: 'dark',
     headerBg: '#1c2f20',
     footerBg: '#3a1e08',
@@ -80,6 +86,7 @@ export const THEMES: Theme[] = [
   },
   {
     name: 'プラム',
+    nameEn: 'Plum',
     kind: 'dark',
     headerBg: '#2a1a34',
     footerBg: '#0e2a36',

@@ -147,7 +147,11 @@ export function createKeyboard(): HTMLElement {
     if (rowOctave === 4) {
       const logo = document.createElement('div');
       logo.className = 'kb-logo';
-      logo.textContent = 'NamaHam';
+      const updateLogo = () => {
+        logo.textContent = store.get('lang') === 'en' ? 'NamaHarmony' : 'NamaHam';
+      };
+      updateLogo();
+      store.on('lang', updateLogo);
       row.appendChild(logo);
     }
 

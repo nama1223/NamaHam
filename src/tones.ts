@@ -1,5 +1,6 @@
 export interface ToneSpec {
   name: string;
+  nameEn: string;
   harmonics: number[];
   attack: number;
   release: number;
@@ -9,6 +10,7 @@ export interface ToneSpec {
 export const TONES: ToneSpec[] = [
   {
     name: 'クラリネット',
+    nameEn: 'Clarinet',
     harmonics: [0, 1.00, 0.02, 0.50, 0.01, 0.22, 0.01, 0.08, 0.01, 0.04],
     attack: 0.03,
     release: 0.04,
@@ -16,6 +18,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: 'フルート',
+    nameEn: 'Flute',
     harmonics: [0, 1.00, 0.30, 0.05, 0.02, 0.01],
     attack: 0.05,
     release: 0.06,
@@ -23,6 +26,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: 'トランペット',
+    nameEn: 'Trumpet',
     harmonics: [0, 1.00, 0.80, 0.50, 0.40, 0.25, 0.20, 0.15, 0.10, 0.08, 0.05],
     attack: 0.02,
     release: 0.05,
@@ -30,6 +34,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: 'オーボエ',
+    nameEn: 'Oboe',
     harmonics: [0, 0.60, 1.00, 0.70, 0.50, 0.40, 0.30, 0.20, 0.15],
     attack: 0.03,
     release: 0.05,
@@ -37,6 +42,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: 'ホルン',
+    nameEn: 'Horn',
     harmonics: [0, 1.00, 0.50, 0.30, 0.15, 0.07, 0.03],
     attack: 0.06,
     release: 0.10,
@@ -44,6 +50,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: '矩形波',
+    nameEn: 'Square Wave',
     harmonics: [0, 1.00, 0, 0.33, 0, 0.20, 0, 0.14, 0, 0.11],
     attack: 0.02,
     release: 0.04,
@@ -51,6 +58,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: '正弦波',
+    nameEn: 'Sine Wave',
     harmonics: [0, 1.00],
     attack: 0.03,
     release: 0.05,
@@ -58,6 +66,7 @@ export const TONES: ToneSpec[] = [
   },
   {
     name: 'のこぎり波',
+    nameEn: 'Saw Wave',
     harmonics: [0, 1.00, 0.50, 0.33, 0.25, 0.20, 0.16, 0.14, 0.12, 0.11],
     attack: 0.02,
     release: 0.05,

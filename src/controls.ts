@@ -1,10 +1,14 @@
 import { store, NOTE_NAMES_FLAT } from './state';
 import { TONES, audio } from './tones';
+import type { ToneSpec } from './tones';
 import { attachScrollSwipe } from './scrollSwipe';
 import { openListModal } from './modal';
 import { t, applyLocale } from './locale';
 
 function getLang() { return store.get('lang'); }
+function getToneLabel(tone: ToneSpec): string {
+  return getLang() === 'en' ? tone.nameEn : tone.name;
+}
 
 function renderSpeaker(volume: number): string {
   const waves: string[] = [];
@@ -77,7 +81,7 @@ export function createTopBar(): HTMLElement {
   toneBtn.className = 'pill scroll-target tone-pill';
   toneBtn.setAttribute('role', 'button');
   const toneText = document.createElement('span');
-  toneText.textContent = TONES[store.get('toneIndex')].name;
+  toneText.textContent = getToneLabel(TONES[store.get('toneIndex')]);
   toneBtn.appendChild(toneText);
   row1.appendChild(toneBtn);
 
@@ -91,13 +95,13 @@ export function createTopBar(): HTMLElement {
   toneBtn.addEventListener('click', () => {
     openListModal(
       t(getLang(), 'toneModal'),
-      TONES.map((tn, i) => ({ label: tn.name, value: i })),
+      TONES.map((tn, i) => ({ label: getToneLabel(tn), value: i })),
       store.get('toneIndex'),
       (v) => store.set('toneIndex', v),
     );
   });
   store.on('toneIndex', (v) => {
-    toneText.textContent = TONES[v].name;
+    toneText.textContent = getToneLabel(TONES[v]);
     audio.setTone(TONES[v]);
   });
 
@@ -108,7 +112,7 @@ export function createTopBar(): HTMLElement {
   row2.className = 'topbar-row';
 
   const sustainBtn = document.createElement('div');
-  sustainBtn.className = 'pill toggle-pill';
+  sustainBtn.className = 'pill toggle-pill sustain-btn';
   sustainBtn.dataset.i18n = 'sustain';
   sustainBtn.textContent = t(getLang(), 'sustain');
   sustainBtn.setAttribute('role', 'button');
@@ -144,6 +148,10 @@ export function createTopBar(): HTMLElement {
   volWrap.appendChild(volPopup);
 
   speakerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    volPopup.classList.toggle('shown');
+  });
+  volNum.addEventListener('click', (e) => {
     e.stopPropagation();
     volPopup.classList.toggle('shown');
   });
@@ -204,7 +212,10 @@ export function createTopBar(): HTMLElement {
   top.appendChild(row2);
 
   // Update labels on language change
-  store.on('lang', (lang) => applyLocale(lang));
+  store.on('lang', (lang) => {
+    applyLocale(lang);
+    toneText.textContent = getToneLabel(TONES[store.get('toneIndex')]);
+  });
 
   return top;
 }

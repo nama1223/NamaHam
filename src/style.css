@@ -135,7 +135,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 .speaker-btn {
   background: transparent;
@@ -158,6 +158,7 @@ body {
   min-width: 40px;
   text-align: center;
   color: var(--text);
+  cursor: pointer;
 }
 .vol-popup {
   position: absolute;
@@ -258,7 +259,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(24px, 8vw, 48px);
+  font-size: clamp(36px, 12vw, 72px);
   font-weight: 800;
   color: rgba(0,0,0,0.11);
   letter-spacing: 0.04em;
@@ -572,6 +573,11 @@ body {
 }
 [data-theme-kind="dark"] .speaker-btn { color: var(--text); }
 [data-theme-kind="dark"] .vol-popup { background: var(--panel-bg); color: var(--text); }
+
+.sustain-btn {
+  padding-left: calc(14px + 1em);
+  padding-right: calc(14px + 1em);
+}
 
 /* Mobile sizing tweaks */
 @media (max-width: 480px) {

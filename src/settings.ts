@@ -99,6 +99,9 @@ export function createSettingsScreen(): HTMLElement {
       updateWakeStatus(wakeInput.checked, lang);
       pitchLabel.textContent = t(lang, 'concertPitch');
       themeLabel.textContent = t(lang, 'themeColor');
+      themeNameEls.forEach((el, i) => {
+        el.textContent = lang === 'en' ? THEMES[i].nameEn : THEMES[i].name;
+      });
     });
     langRow.appendChild(btn);
   });
@@ -197,6 +200,7 @@ export function createSettingsScreen(): HTMLElement {
 
   const themeGrid = document.createElement('div');
   themeGrid.className = 'theme-grid';
+  const themeNameEls: HTMLElement[] = [];
   THEMES.forEach((th, i) => {
     const cell = document.createElement('button');
     cell.className = 'theme-cell';
@@ -208,6 +212,8 @@ export function createSettingsScreen(): HTMLElement {
       </div>
       <div class="theme-name">${th.name}</div>
     `;
+    const nameEl = cell.querySelector('.theme-name') as HTMLElement;
+    themeNameEls.push(nameEl);
     const refresh = () => cell.classList.toggle('active', store.get('themeIndex') === i);
     refresh();
     store.on('themeIndex', refresh);
