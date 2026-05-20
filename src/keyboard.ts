@@ -242,6 +242,14 @@ export function createKeyboard(): HTMLElement {
 
   wrap.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  // Prevent the browser from passing multi-touch sequences to OS gesture
+  // recognizers (e.g. Samsung 3-finger screenshot swipe). This stops
+  // pointercancel from firing and notes cutting out on simultaneous touches.
+  // Hardware screenshots (power + volume-down) are OS-level and unaffected.
+  const absorbTouch = (e: TouchEvent) => e.preventDefault();
+  wrap.addEventListener('touchstart', absorbTouch, { passive: false });
+  wrap.addEventListener('touchmove',  absorbTouch, { passive: false });
+
   return wrap;
 }
 
