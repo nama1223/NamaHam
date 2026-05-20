@@ -84,6 +84,10 @@ body {
 .icon-btn:active {
   background: color-mix(in srgb, var(--text) 12%, transparent);
 }
+.gear-btn {
+  font-size: 22px;
+  line-height: 1;
+}
 
 .pill {
   background: var(--panel-bg);
@@ -247,13 +251,16 @@ body {
 }
 .kb-logo {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 62%;   /* below the black keys (which end at ~62% from top) */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(38px, 11vw, 64px);
+  font-size: clamp(24px, 8vw, 48px);
   font-weight: 800;
-  color: rgba(0,0,0,0.13);
+  color: rgba(0,0,0,0.11);
   letter-spacing: 0.04em;
   pointer-events: none;
   z-index: 2;
@@ -273,22 +280,39 @@ body {
 /* ---------- Bottom bar ---------- */
 .bottombar {
   background: var(--footer-bg);
+  color: var(--footer-text);
   padding: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-top: none;
+}
+.bottombar .b-label {
+  color: var(--footer-text);
 }
 .bottombar .root-btn {
   flex: 1 1 auto;
   font-size: 18px;
+  background: color-mix(in srgb, var(--footer-text) 12%, transparent);
+  color: var(--footer-text);
+  border-color: var(--footer-text);
+}
+.bottombar .root-btn.on {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.bottombar .pill:not(.root-btn):not(.temp-btn) {
+  background: color-mix(in srgb, var(--footer-text) 14%, transparent);
+  color: var(--footer-text);
+  border-color: var(--footer-text);
 }
 .bottombar .temp-btn {
   min-width: 48px;
   font-size: 22px;
-  background: #fff;
-  color: #111;
-  border-color: #111;
+  background: color-mix(in srgb, var(--footer-text) 12%, transparent);
+  color: var(--footer-text);
+  border-color: var(--footer-text);
 }
 .bottombar .temp-btn.just {
   background: var(--accent);
@@ -402,6 +426,28 @@ body {
 .setting-label {
   font-weight: 700;
   margin-bottom: 8px;
+}
+
+/* Language toggle */
+.lang-row {
+  display: flex;
+  gap: 8px;
+}
+.lang-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid color-mix(in srgb, var(--text) 25%, transparent);
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lang-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .wake-row {

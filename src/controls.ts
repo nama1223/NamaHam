@@ -2,20 +2,9 @@ import { store, NOTE_NAMES_FLAT } from './state';
 import { TONES, audio } from './tones';
 import { attachScrollSwipe } from './scrollSwipe';
 import { openListModal } from './modal';
+import { t, applyLocale } from './locale';
 
-function speakerIcon(volume: number): string {
-  if (volume <= 0) return 'OFF';
-  if (volume < 34) return 'LOW';
-  if (volume < 67) return 'MID';
-  return 'HIGH';
-}
-
-function setSpeakerGraphic(el: HTMLElement, volume: number): void {
-  const kind = speakerIcon(volume);
-  el.className = 'speaker-svg';
-  el.dataset.level = kind;
-  el.innerHTML = renderSpeaker(volume);
-}
+function getLang() { return store.get('lang'); }
 
 function renderSpeaker(volume: number): string {
   const waves: string[] = [];
@@ -35,23 +24,26 @@ export function createTopBar(): HTMLElement {
   const row1 = document.createElement('div');
   row1.className = 'topbar-row';
 
+  // Gear button (settings)
   const gear = document.createElement('button');
-  gear.className = 'icon-btn';
+  gear.className = 'icon-btn gear-btn';
   gear.setAttribute('aria-label', '設定');
-  gear.innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 8.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7Zm9.5 3.5l-1.94-1.12l.32-2.2l-2.13-.83l-1.12-1.94l-2.2.32L13.12 4.5h-2.24L9.57 6.23l-2.2-.32L6.25 7.85l-2.13.83l.32 2.2L2.5 12l1.94 1.12l-.32 2.2l2.13.83l1.12 1.94l2.2-.32l1.31 1.73h2.24l1.31-1.73l2.2.32l1.12-1.94l2.13-.83l-.32-2.2L21.5 12Z"/></svg>`;
+  gear.textContent = '⚙️';
   gear.addEventListener('click', () => {
-    const event = new CustomEvent('namaham:open-settings');
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('namaham:open-settings'));
   });
   row1.appendChild(gear);
 
+  // 移調 label + pill
   const transposeLabel = document.createElement('span');
   transposeLabel.className = 'topbar-label';
-  transposeLabel.textContent = '移調';
+  transposeLabel.dataset.i18n = 'transpose';
+  transposeLabel.textContent = t(getLang(), 'transpose');
   row1.appendChild(transposeLabel);
 
   const transposeBtn = document.createElement('div');
   transposeBtn.className = 'pill scroll-target';
+  transposeBtn.setAttribute('role', 'button');
   const transposeText = document.createElement('span');
   transposeText.textContent = NOTE_NAMES_FLAT[store.get('transpose')];
   transposeBtn.appendChild(transposeText);
@@ -59,26 +51,31 @@ export function createTopBar(): HTMLElement {
 
   attachScrollSwipe(transposeBtn, {
     sensitivity: 24,
-    wheelSensitivity: 60,
+    wheelSensitivity: 100,
     onStep: (d) => {
-      const next = (store.get('transpose') + d + 12) % 12;
-      store.set('transpose', next);
-    },
-    onTap: () => {
-      openListModal(
-        '移調',
-        NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
-        store.get('transpose'),
-        (v) => store.set('transpose', v),
-      );
+      store.set('transpose', (store.get('transpose') + d + 12) % 12);
     },
   });
-  store.on('transpose', (v) => {
-    transposeText.textContent = NOTE_NAMES_FLAT[v];
+  transposeBtn.addEventListener('click', () => {
+    openListModal(
+      t(getLang(), 'transposeModal'),
+      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
+      store.get('transpose'),
+      (v) => store.set('transpose', v),
+    );
   });
+  store.on('transpose', (v) => { transposeText.textContent = NOTE_NAMES_FLAT[v]; });
+
+  // 音色 label + pill
+  const toneLabel = document.createElement('span');
+  toneLabel.className = 'topbar-label';
+  toneLabel.dataset.i18n = 'tone';
+  toneLabel.textContent = t(getLang(), 'tone');
+  row1.appendChild(toneLabel);
 
   const toneBtn = document.createElement('div');
   toneBtn.className = 'pill scroll-target tone-pill';
+  toneBtn.setAttribute('role', 'button');
   const toneText = document.createElement('span');
   toneText.textContent = TONES[store.get('toneIndex')].name;
   toneBtn.appendChild(toneText);
@@ -86,19 +83,18 @@ export function createTopBar(): HTMLElement {
 
   attachScrollSwipe(toneBtn, {
     sensitivity: 28,
-    wheelSensitivity: 70,
+    wheelSensitivity: 100,
     onStep: (d) => {
-      const next = (store.get('toneIndex') + d + TONES.length) % TONES.length;
-      store.set('toneIndex', next);
+      store.set('toneIndex', (store.get('toneIndex') + d + TONES.length) % TONES.length);
     },
-    onTap: () => {
-      openListModal(
-        '音色',
-        TONES.map((t, i) => ({ label: t.name, value: i })),
-        store.get('toneIndex'),
-        (v) => store.set('toneIndex', v),
-      );
-    },
+  });
+  toneBtn.addEventListener('click', () => {
+    openListModal(
+      t(getLang(), 'toneModal'),
+      TONES.map((tn, i) => ({ label: tn.name, value: i })),
+      store.get('toneIndex'),
+      (v) => store.set('toneIndex', v),
+    );
   });
   store.on('toneIndex', (v) => {
     toneText.textContent = TONES[v].name;
@@ -107,31 +103,28 @@ export function createTopBar(): HTMLElement {
 
   top.appendChild(row1);
 
+  // Row 2
   const row2 = document.createElement('div');
   row2.className = 'topbar-row';
 
   const sustainBtn = document.createElement('div');
   sustainBtn.className = 'pill toggle-pill';
-  sustainBtn.textContent = '持続音';
-  sustainBtn.addEventListener('click', () => {
-    store.set('sustain', !store.get('sustain'));
-  });
-  const refreshSustain = () => {
-    sustainBtn.classList.toggle('on', store.get('sustain'));
-  };
+  sustainBtn.dataset.i18n = 'sustain';
+  sustainBtn.textContent = t(getLang(), 'sustain');
+  sustainBtn.setAttribute('role', 'button');
+  sustainBtn.addEventListener('click', () => store.set('sustain', !store.get('sustain')));
+  const refreshSustain = () => sustainBtn.classList.toggle('on', store.get('sustain'));
   refreshSustain();
   store.on('sustain', refreshSustain);
   row2.appendChild(sustainBtn);
 
+  // Volume
   const volWrap = document.createElement('div');
   volWrap.className = 'vol-wrap scroll-target';
 
   const speakerBtn = document.createElement('button');
   speakerBtn.className = 'speaker-btn';
-  const speakerSvg = document.createElement('span');
-  speakerSvg.className = 'speaker-svg';
-  speakerBtn.appendChild(speakerSvg);
-  setSpeakerGraphic(speakerSvg, store.get('volume'));
+  speakerBtn.innerHTML = renderSpeaker(store.get('volume'));
   volWrap.appendChild(speakerBtn);
 
   const volNum = document.createElement('div');
@@ -155,62 +148,63 @@ export function createTopBar(): HTMLElement {
     volPopup.classList.toggle('shown');
   });
   document.addEventListener('click', (e) => {
-    if (!volWrap.contains(e.target as Node)) {
-      volPopup.classList.remove('shown');
-    }
+    if (!volWrap.contains(e.target as Node)) volPopup.classList.remove('shown');
   });
   volSlider.addEventListener('input', () => {
     store.set('volume', parseInt(volSlider.value, 10));
   });
-
   attachScrollSwipe(speakerBtn, {
     sensitivity: 6,
-    wheelSensitivity: 30,
+    wheelSensitivity: 40,
     onStep: (d) => {
-      const next = Math.max(0, Math.min(100, store.get('volume') + d * 2));
-      store.set('volume', next);
+      store.set('volume', Math.max(0, Math.min(100, store.get('volume') + d * 2)));
     },
   });
   store.on('volume', (v) => {
     volNum.textContent = `${v}%`;
     volSlider.value = String(v);
-    setSpeakerGraphic(speakerSvg, v);
+    speakerBtn.innerHTML = renderSpeaker(v);
     audio.setVolume(v);
   });
-
   row2.appendChild(volWrap);
 
+  // Range (octave)
   const rangeWrap = document.createElement('div');
   rangeWrap.className = 'range-wrap scroll-target';
+
   const rangeDown = document.createElement('button');
   rangeDown.className = 'tri-btn';
   rangeDown.textContent = '▼';
   rangeDown.addEventListener('click', () => {
-    const next = Math.max(-2, store.get('octaveOffset') - 1);
-    store.set('octaveOffset', next);
+    store.set('octaveOffset', Math.max(-2, store.get('octaveOffset') - 1));
   });
+
   const rangeText = document.createElement('div');
   rangeText.className = 'range-text';
-  rangeText.textContent = '音域';
+  rangeText.dataset.i18n = 'range';
+  rangeText.textContent = t(getLang(), 'range');
+
   const rangeUp = document.createElement('button');
   rangeUp.className = 'tri-btn';
   rangeUp.textContent = '▲';
   rangeUp.addEventListener('click', () => {
-    const next = Math.min(2, store.get('octaveOffset') + 1);
-    store.set('octaveOffset', next);
+    store.set('octaveOffset', Math.min(2, store.get('octaveOffset') + 1));
   });
+
   rangeWrap.append(rangeDown, rangeText, rangeUp);
   attachScrollSwipe(rangeWrap, {
     sensitivity: 60,
-    wheelSensitivity: 140,
+    wheelSensitivity: 150,
     onStep: (d) => {
-      const next = Math.max(-2, Math.min(2, store.get('octaveOffset') + d));
-      store.set('octaveOffset', next);
+      store.set('octaveOffset', Math.max(-2, Math.min(2, store.get('octaveOffset') + d)));
     },
   });
   row2.appendChild(rangeWrap);
 
   top.appendChild(row2);
+
+  // Update labels on language change
+  store.on('lang', (lang) => applyLocale(lang));
 
   return top;
 }
@@ -221,66 +215,69 @@ export function createBottomBar(): HTMLElement {
 
   const harmonyLabel = document.createElement('span');
   harmonyLabel.className = 'b-label';
-  harmonyLabel.textContent = '和声';
+  harmonyLabel.dataset.i18n = 'harmony';
+  harmonyLabel.textContent = t(getLang(), 'harmony');
   bot.appendChild(harmonyLabel);
 
   const rootBtn = document.createElement('div');
   rootBtn.className = 'pill toggle-pill root-btn';
-  rootBtn.textContent = '根音を弾く';
-  rootBtn.addEventListener('click', () => {
-    store.set('rootMode', !store.get('rootMode'));
-  });
-  const refreshRoot = () => {
-    rootBtn.classList.toggle('on', store.get('rootMode'));
-  };
+  rootBtn.dataset.i18n = 'playRoot';
+  rootBtn.textContent = t(getLang(), 'playRoot');
+  rootBtn.setAttribute('role', 'button');
+  rootBtn.addEventListener('click', () => store.set('rootMode', !store.get('rootMode')));
+  const refreshRoot = () => rootBtn.classList.toggle('on', store.get('rootMode'));
   refreshRoot();
   store.on('rootMode', refreshRoot);
   bot.appendChild(rootBtn);
 
   const keyLabel = document.createElement('span');
   keyLabel.className = 'b-label';
-  keyLabel.textContent = '調';
+  keyLabel.dataset.i18n = 'key';
+  keyLabel.textContent = t(getLang(), 'key');
   bot.appendChild(keyLabel);
 
   const keyBtn = document.createElement('div');
   keyBtn.className = 'pill scroll-target';
+  keyBtn.setAttribute('role', 'button');
   const keyText = document.createElement('span');
   keyText.textContent = NOTE_NAMES_FLAT[store.get('key')];
   keyBtn.appendChild(keyText);
   bot.appendChild(keyBtn);
+
   attachScrollSwipe(keyBtn, {
     sensitivity: 24,
-    wheelSensitivity: 60,
-    onStep: (d) => {
-      const next = (store.get('key') + d + 12) % 12;
-      store.set('key', next);
-    },
-    onTap: () => {
-      openListModal(
-        '調（純正律）',
-        NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
-        store.get('key'),
-        (v) => store.set('key', v),
-      );
-    },
+    wheelSensitivity: 100,
+    onStep: (d) => { store.set('key', (store.get('key') + d + 12) % 12); },
   });
-  store.on('key', (v) => {
-    keyText.textContent = NOTE_NAMES_FLAT[v];
+  keyBtn.addEventListener('click', () => {
+    openListModal(
+      t(getLang(), 'keyModal'),
+      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
+      store.get('key'),
+      (v) => store.set('key', v),
+    );
   });
+  store.on('key', (v) => { keyText.textContent = NOTE_NAMES_FLAT[v]; });
 
   const tempBtn = document.createElement('div');
   tempBtn.className = 'pill temp-btn';
+  tempBtn.setAttribute('role', 'button');
   const tempText = document.createElement('span');
-  tempText.textContent = store.get('temperament') === 'just' ? '純' : '平';
+  const getTempLabel = () => store.get('temperament') === 'just'
+    ? t(getLang(), 'just')
+    : t(getLang(), 'equal');
+  tempText.textContent = getTempLabel();
   tempBtn.appendChild(tempText);
   tempBtn.addEventListener('click', () => {
     store.set('temperament', store.get('temperament') === 'just' ? 'equal' : 'just');
   });
-  store.on('temperament', (v) => {
-    tempText.textContent = v === 'just' ? '純' : '平';
-    tempBtn.classList.toggle('just', v === 'just');
-  });
-  tempBtn.classList.toggle('just', store.get('temperament') === 'just');
+  const refreshTemp = () => {
+    tempText.textContent = getTempLabel();
+    tempBtn.classList.toggle('just', store.get('temperament') === 'just');
+  };
+  store.on('temperament', refreshTemp);
+  store.on('lang', refreshTemp);
+  refreshTemp();
   bot.appendChild(tempBtn);
 
   return bot;

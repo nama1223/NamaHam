@@ -1,6 +1,8 @@
 import { store } from './state';
 import { THEMES } from './themes';
 import { attachScrollSwipe } from './scrollSwipe';
+import { t, applyLocale } from './locale';
+import type { Lang } from './locale';
 
 interface WakeLockSentinel {
   released: boolean;
@@ -29,10 +31,7 @@ function createWakeLockController(onChange: (active: boolean) => void): WakeLock
     try {
       const nav = navigator as unknown as { wakeLock: { request: (type: 'screen') => Promise<WakeLockSentinel> } };
       sentinel = await nav.wakeLock.request('screen');
-      sentinel.addEventListener('release', () => {
-        sentinel = null;
-        onChange(false);
-      });
+      sentinel.addEventListener('release', () => { sentinel = null; onChange(false); });
       onChange(true);
     } catch {
       sentinel = null;
@@ -41,10 +40,7 @@ function createWakeLockController(onChange: (active: boolean) => void): WakeLock
   }
 
   async function releaseLock(): Promise<void> {
-    if (sentinel) {
-      try { await sentinel.release(); } catch {}
-      sentinel = null;
-    }
+    if (sentinel) { try { await sentinel.release(); } catch {} sentinel = null; }
     onChange(false);
   }
 
@@ -58,11 +54,13 @@ export function createSettingsScreen(): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'settings-panel';
 
+  // Header
   const header = document.createElement('div');
   header.className = 'settings-header';
   const titleEl = document.createElement('div');
   titleEl.className = 'settings-title';
-  titleEl.textContent = '設定';
+  titleEl.dataset.i18n = 'settings';
+  titleEl.textContent = t(store.get('lang'), 'settings');
   const closeBtn = document.createElement('button');
   closeBtn.className = 'settings-close';
   closeBtn.textContent = '×';
@@ -73,19 +71,50 @@ export function createSettingsScreen(): HTMLElement {
   const body = document.createElement('div');
   body.className = 'settings-body';
 
+  // ---- Language toggle ----
+  const langBlock = document.createElement('div');
+  langBlock.className = 'setting-block';
+  const langLabel = document.createElement('div');
+  langLabel.className = 'setting-label';
+  langLabel.dataset.i18n = 'language';
+  langLabel.textContent = t(store.get('lang'), 'language');
+  langBlock.appendChild(langLabel);
+
+  const langRow = document.createElement('div');
+  langRow.className = 'lang-row';
+  (['ja', 'en'] as Lang[]).forEach((lang) => {
+    const btn = document.createElement('button');
+    btn.className = 'lang-btn';
+    btn.textContent = lang === 'ja' ? '日本語' : 'English';
+    const refreshLangBtn = () => btn.classList.toggle('active', store.get('lang') === lang);
+    refreshLangBtn();
+    store.on('lang', refreshLangBtn);
+    btn.addEventListener('click', () => {
+      store.set('lang', lang);
+      applyLocale(lang);
+      // Re-render dynamic labels inside settings
+      titleEl.textContent = t(lang, 'settings');
+      langLabel.textContent = t(lang, 'language');
+      wakeTitle.textContent = t(lang, 'keepAwake');
+      updateWakeStatus(wakeInput.checked, lang);
+      pitchLabel.textContent = t(lang, 'concertPitch');
+      themeLabel.textContent = t(lang, 'themeColor');
+    });
+    langRow.appendChild(btn);
+  });
+  langBlock.appendChild(langRow);
+  body.appendChild(langBlock);
+
   // ---- Wake lock ----
   const wakeBlock = document.createElement('div');
   wakeBlock.className = 'setting-block';
   const wakeRow = document.createElement('div');
   wakeRow.className = 'wake-row';
+
   const wakeInfo = document.createElement('div');
   const wakeTitle = document.createElement('div');
   wakeTitle.className = 'wake-title';
-  const wakeEmoji = document.createElement('span');
-  wakeEmoji.textContent = '😴';
-  const wakeLabel = document.createElement('span');
-  wakeLabel.textContent = ' スリープ防止';
-  wakeTitle.append(wakeEmoji, wakeLabel);
+  wakeTitle.textContent = t(store.get('lang'), 'keepAwake');
   const wakeStatus = document.createElement('div');
   wakeStatus.className = 'wake-status';
   wakeInfo.append(wakeTitle, wakeStatus);
@@ -97,31 +126,24 @@ export function createSettingsScreen(): HTMLElement {
   const wakeSlider = document.createElement('span');
   wakeSlider.className = 'switch-slider';
   wakeSwitch.append(wakeInput, wakeSlider);
-
   wakeRow.append(wakeInfo, wakeSwitch);
   wakeBlock.appendChild(wakeRow);
   body.appendChild(wakeBlock);
 
-  const updateWakeUi = (active: boolean) => {
+  const updateWakeStatus = (active: boolean, lang = store.get('lang')) => {
     wakeInput.checked = active;
-    wakeEmoji.textContent = active ? '🥺' : '😴';
-    wakeStatus.textContent = active ? '有効（画面をオンに維持）' : '無効';
+    wakeStatus.textContent = active ? t(lang, 'keepAwakeOn') : t(lang, 'keepAwakeOff');
     wakeSlider.classList.toggle('on', active);
   };
 
-  const wakeCtrl = createWakeLockController((active) => {
-    updateWakeUi(active);
-    if (!active && store.get('wakeLock')) {
-      // user toggled off via OS visibility; keep preference
-    }
-  });
+  const wakeCtrl = createWakeLockController((active) => updateWakeStatus(active));
 
   if (!wakeCtrl.isSupported) {
-    wakeStatus.textContent = '非対応のブラウザです';
+    wakeStatus.textContent = t(store.get('lang'), 'keepAwakeUnsupported');
     wakeInput.disabled = true;
     wakeBlock.classList.add('disabled');
   } else {
-    updateWakeUi(store.get('wakeLock'));
+    updateWakeStatus(store.get('wakeLock'));
     if (store.get('wakeLock')) void wakeCtrl.acquire();
   }
 
@@ -137,7 +159,7 @@ export function createSettingsScreen(): HTMLElement {
   pitchBlock.className = 'setting-block';
   const pitchLabel = document.createElement('div');
   pitchLabel.className = 'setting-label';
-  pitchLabel.textContent = 'コンサートピッチ (A=)';
+  pitchLabel.textContent = t(store.get('lang'), 'concertPitch');
   const pitchRow = document.createElement('div');
   pitchRow.className = 'pitch-row';
 
@@ -151,21 +173,15 @@ export function createSettingsScreen(): HTMLElement {
   plusBtn.className = 'pitch-step';
   plusBtn.textContent = '+';
 
-  const setPitch = (v: number) => {
-    const clamped = Math.max(415, Math.min(466, v));
-    store.set('concertPitch', clamped);
-  };
+  const setPitch = (v: number) => store.set('concertPitch', Math.max(415, Math.min(466, v)));
   minusBtn.addEventListener('click', () => setPitch(store.get('concertPitch') - 1));
   plusBtn.addEventListener('click', () => setPitch(store.get('concertPitch') + 1));
-
   attachScrollSwipe(pitchVal, {
     sensitivity: 20,
     wheelSensitivity: 50,
     onStep: (d) => setPitch(store.get('concertPitch') + d),
   });
-  store.on('concertPitch', (v) => {
-    pitchVal.textContent = `${v} Hz`;
-  });
+  store.on('concertPitch', (v) => { pitchVal.textContent = `${v} Hz`; });
 
   pitchRow.append(minusBtn, pitchVal, plusBtn);
   pitchBlock.append(pitchLabel, pitchRow);
@@ -176,22 +192,21 @@ export function createSettingsScreen(): HTMLElement {
   themeBlock.className = 'setting-block';
   const themeLabel = document.createElement('div');
   themeLabel.className = 'setting-label';
-  themeLabel.textContent = 'テーマカラー';
+  themeLabel.textContent = t(store.get('lang'), 'themeColor');
   themeBlock.appendChild(themeLabel);
 
   const themeGrid = document.createElement('div');
   themeGrid.className = 'theme-grid';
-
-  THEMES.forEach((t, i) => {
+  THEMES.forEach((th, i) => {
     const cell = document.createElement('button');
     cell.className = 'theme-cell';
-    cell.setAttribute('aria-label', t.name);
+    cell.setAttribute('aria-label', th.name);
     cell.innerHTML = `
       <div class="theme-swatch">
-        <div class="theme-half" style="background:${t.headerBg}"></div>
-        <div class="theme-half" style="background:${t.footerBg}"></div>
+        <div class="theme-half" style="background:${th.headerBg}"></div>
+        <div class="theme-half" style="background:${th.footerBg}"></div>
       </div>
-      <div class="theme-name">${t.name}</div>
+      <div class="theme-name">${th.name}</div>
     `;
     const refresh = () => cell.classList.toggle('active', store.get('themeIndex') === i);
     refresh();
@@ -204,10 +219,7 @@ export function createSettingsScreen(): HTMLElement {
 
   panel.appendChild(body);
   overlay.appendChild(panel);
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) hide();
-  });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) hide(); });
 
   function show(): void {
     document.body.appendChild(overlay);
@@ -219,6 +231,5 @@ export function createSettingsScreen(): HTMLElement {
   }
 
   window.addEventListener('namaham:open-settings', show);
-
   return overlay;
 }

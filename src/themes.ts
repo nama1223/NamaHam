@@ -3,6 +3,7 @@ export interface Theme {
   kind: 'light' | 'dark';
   headerBg: string;
   footerBg: string;
+  footerText: string;
   text: string;
   subText: string;
   panelBg: string;
@@ -15,8 +16,9 @@ export const THEMES: Theme[] = [
   {
     name: 'クリーム',
     kind: 'light',
-    headerBg: '#e9dfca',
-    footerBg: '#f4ecd8',
+    headerBg: '#ede3cc',
+    footerBg: '#7a4f28',
+    footerText: '#f5e6d6',
     text: '#222',
     subText: '#555',
     panelBg: '#ffffff',
@@ -27,8 +29,9 @@ export const THEMES: Theme[] = [
   {
     name: 'スカイ',
     kind: 'light',
-    headerBg: '#d6e6f2',
-    footerBg: '#eaf3fb',
+    headerBg: '#d4e5f0',
+    footerBg: '#1a5e88',
+    footerText: '#d8edf8',
     text: '#11304a',
     subText: '#4a6a82',
     panelBg: '#ffffff',
@@ -39,8 +42,9 @@ export const THEMES: Theme[] = [
   {
     name: 'ミント',
     kind: 'light',
-    headerBg: '#cde9d8',
-    footerBg: '#e3f3ea',
+    headerBg: '#cceadb',
+    footerBg: '#1e6b42',
+    footerText: '#d0f0e2',
     text: '#1c3a2c',
     subText: '#4a6b58',
     panelBg: '#ffffff',
@@ -51,8 +55,9 @@ export const THEMES: Theme[] = [
   {
     name: 'ネイビー',
     kind: 'dark',
-    headerBg: '#16243a',
-    footerBg: '#1f3252',
+    headerBg: '#1c2d42',
+    footerBg: '#0c1e35',
+    footerText: '#a8c4de',
     text: '#f0f3f7',
     subText: '#a8b8cc',
     panelBg: '#2a3a55',
@@ -63,8 +68,9 @@ export const THEMES: Theme[] = [
   {
     name: 'フォレスト',
     kind: 'dark',
-    headerBg: '#1a2c1f',
-    footerBg: '#243e2c',
+    headerBg: '#1c2f20',
+    footerBg: '#3a1e08',
+    footerText: '#e0c4a8',
     text: '#eef5ef',
     subText: '#a8c2af',
     panelBg: '#314a39',
@@ -75,8 +81,9 @@ export const THEMES: Theme[] = [
   {
     name: 'プラム',
     kind: 'dark',
-    headerBg: '#2b1b34',
-    footerBg: '#3b2547',
+    headerBg: '#2a1a34',
+    footerBg: '#0e2a36',
+    footerText: '#a8d4e0',
     text: '#f4ecf7',
     subText: '#c3aed0',
     panelBg: '#4a3057',
@@ -91,6 +98,7 @@ export function applyTheme(index: number): void {
   const root = document.documentElement;
   root.style.setProperty('--header-bg', theme.headerBg);
   root.style.setProperty('--footer-bg', theme.footerBg);
+  root.style.setProperty('--footer-text', theme.footerText);
   root.style.setProperty('--text', theme.text);
   root.style.setProperty('--sub-text', theme.subText);
   root.style.setProperty('--panel-bg', theme.panelBg);

@@ -5,10 +5,12 @@ import { createTopBar, createBottomBar } from './controls';
 import { createKeyboard } from './keyboard';
 import { createSettingsScreen } from './settings';
 import { audio, TONES } from './tones';
+import { applyLocale } from './locale';
 
 store.load();
 applyTheme(store.get('themeIndex'));
 store.on('themeIndex', (i) => applyTheme(i));
+applyLocale(store.get('lang'));
 
 audio.setTone(TONES[store.get('toneIndex')]);
 audio.setVolume(store.get('volume'));

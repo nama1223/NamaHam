@@ -12,6 +12,7 @@ export interface AppState {
   concertPitch: number;     // Hz, A4 reference (default 442)
   themeIndex: number;
   wakeLock: boolean;
+  lang: 'ja' | 'en';
 }
 
 const DEFAULT_STATE: AppState = {
@@ -26,6 +27,7 @@ const DEFAULT_STATE: AppState = {
   concertPitch: 442,
   themeIndex: 0,
   wakeLock: false,
+  lang: 'ja',
 };
 
 type Listener<K extends keyof AppState> = (value: AppState[K], key: K) => void;
