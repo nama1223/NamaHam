@@ -236,6 +236,32 @@ export function createSettingsScreen(): HTMLElement {
     setTimeout(() => overlay.remove(), 200);
   }
 
+  // Keep settings panel labels in sync when lang changes externally (e.g. postMessage)
+  store.on('lang', (lang) => {
+    titleEl.textContent = t(lang, 'settings');
+    langLabel.textContent = t(lang, 'language');
+    wakeTitle.textContent = t(lang, 'keepAwake');
+    if (!wakeCtrl.isSupported) {
+      wakeStatus.textContent = t(lang, 'keepAwakeUnsupported');
+    } else {
+      updateWakeStatus(wakeInput.checked, lang);
+    }
+    pitchLabel.textContent = t(lang, 'concertPitch');
+    themeLabel.textContent = t(lang, 'themeColor');
+    themeNameEls.forEach((el, i) => {
+      el.textContent = lang === 'en' ? THEMES[i].nameEn : THEMES[i].name;
+    });
+  });
+
+  // NamaSound+ wake lock control via postMessage
+  window.addEventListener('namaham:set-wakelock', async (e) => {
+    if (!wakeCtrl.isSupported) return;
+    const enabled = (e as CustomEvent<{ enabled: boolean }>).detail.enabled;
+    store.set('wakeLock', enabled);
+    if (enabled) await wakeCtrl.acquire();
+    else await wakeCtrl.releaseLock();
+  });
+
   window.addEventListener('namaham:open-settings', show);
   return overlay;
 }

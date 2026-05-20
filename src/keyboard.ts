@@ -253,6 +253,14 @@ export function createKeyboard(): HTMLElement {
   return wrap;
 }
 
+export function stopAllKeyboard(): void {
+  for (const entry of Array.from(pointerMap.values())) {
+    stopKey(entry.rawMidi);
+  }
+  pointerMap.clear();
+  clearSustained();
+}
+
 export function setKeyboardKeyHighlight(pc: number, active: boolean): void {
   document.querySelectorAll<HTMLElement>('[data-midi]').forEach((el) => {
     const m = Number(el.dataset.midi);

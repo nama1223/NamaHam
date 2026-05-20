@@ -2,10 +2,11 @@ import './style.css';
 import { store } from './state';
 import { applyTheme } from './themes';
 import { createTopBar, createBottomBar } from './controls';
-import { createKeyboard } from './keyboard';
+import { createKeyboard, stopAllKeyboard } from './keyboard';
 import { createSettingsScreen } from './settings';
 import { audio, TONES } from './tones';
 import { applyLocale } from './locale';
+import type { Lang } from './locale';
 
 function applyManifest(lang: string): void {
   const el = document.getElementById('pwa-manifest') as HTMLLinkElement | null;
@@ -39,3 +40,30 @@ const initAudioOnce = () => {
 };
 window.addEventListener('pointerdown', initAudioOnce, { passive: true });
 window.addEventListener('keydown', initAudioOnce);
+
+// ===== NamaSound+ 親フレーム連携 =====
+window.addEventListener('message', (event) => {
+  if (event.origin !== 'https://nama1223.github.io') return;
+  const msg = event.data as { type?: string; lang?: string; enabled?: boolean };
+  if (!msg || typeof msg !== 'object') return;
+  switch (msg.type) {
+    case 'setLanguage': {
+      const lang = msg.lang;
+      if (lang === 'ja' || lang === 'en') store.set('lang', lang as Lang);
+      break;
+    }
+    case 'setWakeLock':
+      window.dispatchEvent(new CustomEvent('namaham:set-wakelock', {
+        detail: { enabled: !!msg.enabled },
+      }));
+      break;
+    case 'pauseAll':
+      stopAllKeyboard();
+      break;
+  }
+});
+
+if (window.parent !== window) {
+  window.parent.postMessage({ type: 'childReady', app: location.pathname }, '*');
+}
+// ===== ここまで =====
