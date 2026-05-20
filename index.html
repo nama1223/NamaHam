@@ -7,9 +7,18 @@
     <meta name="format-detection" content="telephone=no" />
     <title>NamaHam</title>
     <link rel="icon" href="data:," />
+    <link id="pwa-manifest" rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./NamaHam192.png" />
   </head>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js');
+        });
+      }
+    </script>
   </body>
 </html>

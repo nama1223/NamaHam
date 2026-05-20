@@ -132,7 +132,7 @@ export function createTopBar(): HTMLElement {
   volWrap.appendChild(speakerBtn);
 
   const volNum = document.createElement('div');
-  volNum.className = 'vol-num';
+  volNum.className = 'vol-num scroll-target';
   volNum.textContent = `${store.get('volume')}%`;
   volWrap.appendChild(volNum);
 
@@ -161,13 +161,15 @@ export function createTopBar(): HTMLElement {
   volSlider.addEventListener('input', () => {
     store.set('volume', parseInt(volSlider.value, 10));
   });
-  attachScrollSwipe(speakerBtn, {
+  const volSwipeOpts = {
     sensitivity: 6,
     wheelSensitivity: 40,
-    onStep: (d) => {
+    onStep: (d: number) => {
       store.set('volume', Math.max(0, Math.min(100, store.get('volume') + d * 2)));
     },
-  });
+  };
+  attachScrollSwipe(speakerBtn, volSwipeOpts);
+  attachScrollSwipe(volNum, volSwipeOpts);
   store.on('volume', (v) => {
     volNum.textContent = `${v}%`;
     volSlider.value = String(v);
