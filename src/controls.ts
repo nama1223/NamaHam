@@ -10,6 +10,28 @@ function getToneLabel(tone: ToneSpec): string {
   return getLang() === 'en' ? tone.nameEn : tone.name;
 }
 
+// Note display order: C at top, then descending B → Bb → A → … → Db
+const NOTE_ORDER = [0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+
+// Key scroll order: -1 = auto, then same note order as NOTE_ORDER
+const KEY_SCROLL_ORDER = [-1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+
+function getKeyScrollPos(): number {
+  if (store.get('keyAuto')) return 0;
+  const idx = KEY_SCROLL_ORDER.indexOf(store.get('key') as typeof KEY_SCROLL_ORDER[number]);
+  return idx < 0 ? 1 : idx;
+}
+function applyKeyScrollPos(pos: number): void {
+  const len = KEY_SCROLL_ORDER.length;
+  const val = KEY_SCROLL_ORDER[((pos % len) + len) % len];
+  if (val === -1) {
+    store.set('keyAuto', true);
+  } else {
+    store.set('keyAuto', false);
+    store.set('key', val);
+  }
+}
+
 function renderSpeaker(volume: number): string {
   const waves: string[] = [];
   if (volume > 5) waves.push('<path d="M19 9 Q22 12 19 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>');
@@ -57,13 +79,15 @@ export function createTopBar(): HTMLElement {
     sensitivity: 24,
     wheelSensitivity: 100,
     onStep: (d) => {
-      store.set('transpose', (store.get('transpose') + d + 12) % 12);
+      const cur = NOTE_ORDER.indexOf(store.get('transpose') as typeof NOTE_ORDER[number]);
+      const next = ((cur < 0 ? 0 : cur) + d + NOTE_ORDER.length) % NOTE_ORDER.length;
+      store.set('transpose', NOTE_ORDER[next]);
     },
   });
   transposeBtn.addEventListener('click', () => {
     openListModal(
       t(getLang(), 'transposeModal'),
-      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })).reverse(),
+      NOTE_ORDER.map((i) => ({ label: NOTE_NAMES_FLAT[i], value: i })),
       store.get('transpose'),
       (v) => store.set('transpose', v),
     );
@@ -276,13 +300,12 @@ export function createBottomBar(): HTMLElement {
     sensitivity: 24,
     wheelSensitivity: 100,
     onStep: (d) => {
-      store.set('keyAuto', false); // scroll → exit auto mode
-      store.set('key', (store.get('key') + d + 12) % 12);
+      applyKeyScrollPos(getKeyScrollPos() + d);
     },
   });
   keyBtn.addEventListener('click', () => {
     const autoItem = { label: t(getLang(), 'keyAuto'), value: -1 };
-    const noteItems = NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })).reverse();
+    const noteItems = NOTE_ORDER.map((i) => ({ label: NOTE_NAMES_FLAT[i], value: i }));
     const currentVal = store.get('keyAuto') ? -1 : store.get('key');
     openListModal(
       t(getLang(), 'keyModal'),
