@@ -63,7 +63,7 @@ export function createTopBar(): HTMLElement {
   transposeBtn.addEventListener('click', () => {
     openListModal(
       t(getLang(), 'transposeModal'),
-      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
+      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })).reverse(),
       store.get('transpose'),
       (v) => store.set('transpose', v),
     );
@@ -282,7 +282,7 @@ export function createBottomBar(): HTMLElement {
   });
   keyBtn.addEventListener('click', () => {
     const autoItem = { label: t(getLang(), 'keyAuto'), value: -1 };
-    const noteItems = NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i }));
+    const noteItems = NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })).reverse();
     const currentVal = store.get('keyAuto') ? -1 : store.get('key');
     openListModal(
       t(getLang(), 'keyModal'),
