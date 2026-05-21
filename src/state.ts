@@ -18,14 +18,14 @@ export interface AppState {
 }
 
 const DEFAULT_STATE: AppState = {
-  transpose: 10,
+  transpose: 0,
   toneIndex: 0,
   sustain: false,
   volume: 60,
   octaveOffset: 0,
   rootMode: false,
-  key: 10,
-  keyAuto: false,
+  key: 0,
+  keyAuto: true,
   temperament: 'just',
   concertPitch: 442,
   themeIndex: 0,
