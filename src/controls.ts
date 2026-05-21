@@ -80,7 +80,7 @@ export function createTopBar(): HTMLElement {
     wheelSensitivity: 100,
     onStep: (d) => {
       const cur = NOTE_ORDER.indexOf(store.get('transpose') as typeof NOTE_ORDER[number]);
-      const next = ((cur < 0 ? 0 : cur) + d + NOTE_ORDER.length) % NOTE_ORDER.length;
+      const next = ((cur < 0 ? 0 : cur) - d + NOTE_ORDER.length) % NOTE_ORDER.length;
       store.set('transpose', NOTE_ORDER[next]);
     },
   });
@@ -300,7 +300,7 @@ export function createBottomBar(): HTMLElement {
     sensitivity: 24,
     wheelSensitivity: 100,
     onStep: (d) => {
-      applyKeyScrollPos(getKeyScrollPos() + d);
+      applyKeyScrollPos(getKeyScrollPos() - d);
     },
   });
   keyBtn.addEventListener('click', () => {
