@@ -23,6 +23,7 @@ const STRINGS = {
     transposeModal: '移調',
     toneModal: '音色',
     keyModal: '調（純正律）',
+    keyAuto: '自動',
   },
   en: {
     transpose: 'Xpose',
@@ -46,6 +47,7 @@ const STRINGS = {
     transposeModal: 'Transposition',
     toneModal: 'Tone',
     keyModal: 'Key (Just Tuning)',
+    keyAuto: 'Auto',
   },
 } as const;
 

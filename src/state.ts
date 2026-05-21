@@ -8,6 +8,7 @@ export interface AppState {
   octaveOffset: number;     // -2..+2 (shift of keyboard range)
   rootMode: boolean;        // "根音を弾く" toggle
   key: number;              // 0..11 (root for just intonation)
+  keyAuto: boolean;         // auto-detect chord root for just intonation
   temperament: 'equal' | 'just';
   concertPitch: number;     // Hz, A4 reference (default 442)
   themeIndex: number;
@@ -23,6 +24,7 @@ const DEFAULT_STATE: AppState = {
   octaveOffset: 0,
   rootMode: false,
   key: 10,
+  keyAuto: false,
   temperament: 'just',
   concertPitch: 442,
   themeIndex: 0,

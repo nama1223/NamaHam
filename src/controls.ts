@@ -253,24 +253,47 @@ export function createBottomBar(): HTMLElement {
   keyBtn.className = 'pill scroll-target';
   keyBtn.setAttribute('role', 'button');
   const keyText = document.createElement('span');
-  keyText.textContent = NOTE_NAMES_FLAT[store.get('key')];
+
+  const refreshKeyText = () => {
+    if (store.get('keyAuto')) {
+      keyText.textContent = t(getLang(), 'keyAuto') + ':' + NOTE_NAMES_FLAT[store.get('key')];
+    } else {
+      keyText.textContent = NOTE_NAMES_FLAT[store.get('key')];
+    }
+  };
+  refreshKeyText();
   keyBtn.appendChild(keyText);
   bot.appendChild(keyBtn);
 
   attachScrollSwipe(keyBtn, {
     sensitivity: 24,
     wheelSensitivity: 100,
-    onStep: (d) => { store.set('key', (store.get('key') + d + 12) % 12); },
+    onStep: (d) => {
+      store.set('keyAuto', false); // scroll → exit auto mode
+      store.set('key', (store.get('key') + d + 12) % 12);
+    },
   });
   keyBtn.addEventListener('click', () => {
+    const autoItem = { label: t(getLang(), 'keyAuto'), value: -1 };
+    const noteItems = NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i }));
+    const currentVal = store.get('keyAuto') ? -1 : store.get('key');
     openListModal(
       t(getLang(), 'keyModal'),
-      NOTE_NAMES_FLAT.map((n, i) => ({ label: n, value: i })),
-      store.get('key'),
-      (v) => store.set('key', v),
+      [autoItem, ...noteItems],
+      currentVal,
+      (v) => {
+        if (v === -1) {
+          store.set('keyAuto', true);
+        } else {
+          store.set('keyAuto', false);
+          store.set('key', v);
+        }
+      },
     );
   });
-  store.on('key', (v) => { keyText.textContent = NOTE_NAMES_FLAT[v]; });
+  store.on('key', refreshKeyText);
+  store.on('keyAuto', refreshKeyText);
+  store.on('lang', refreshKeyText);
 
   const tempBtn = document.createElement('div');
   tempBtn.className = 'pill temp-btn';

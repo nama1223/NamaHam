@@ -1,6 +1,7 @@
 import { store, NOTE_NAMES_FLAT } from './state';
 import { audio } from './tones';
 import { noteFreq, pcToName } from './pitch';
+import { detectRoot } from './chord';
 
 const ROWS_FROM_TOP = [5, 4, 3, 2];
 const WHITE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
@@ -41,6 +42,7 @@ function startKey(rawMidi: number): void {
     const pc = ((rawMidi % 12) + 12) % 12;
     const transposed = (pc + store.get('transpose')) % 12;
     store.set('key', transposed);
+    store.set('keyAuto', false); // manual root tap exits auto mode
     store.set('rootMode', false);
     flashKey(rawMidi);
     return;
@@ -81,6 +83,7 @@ function handleSustainTap(rawMidi: number): void {
     const pc = ((rawMidi % 12) + 12) % 12;
     const transposed = (pc + store.get('transpose')) % 12;
     store.set('key', transposed);
+    store.set('keyAuto', false); // manual root tap exits auto mode
     store.set('rootMode', false);
     flashKey(rawMidi);
     return;
@@ -90,10 +93,12 @@ function handleSustainTap(rawMidi: number): void {
     sustainedKeys.delete(rawMidi.toString());
     audio.stop(voiceKey);
     setKeyVisualActive(rawMidi, false);
+    onNotesChanged();
   } else {
     sustainedKeys.set(rawMidi.toString(), rawMidi);
     audio.start(voiceKey, effectiveFreq(rawMidi));
     setKeyVisualActive(rawMidi, true);
+    onNotesChanged();
   }
 }
 
@@ -103,6 +108,22 @@ function clearSustained(): void {
     setKeyVisualActive(rawMidi, false);
   }
   sustainedKeys.clear();
+}
+
+/** Called after any note start/stop to update the auto-detected key. */
+function onNotesChanged(): void {
+  if (!store.get('keyAuto')) return;
+  const pcs: number[] = [];
+  for (const entry of pointerMap.values()) {
+    pcs.push(((entry.rawMidi % 12) + 12) % 12);
+  }
+  for (const rawMidi of sustainedKeys.values()) {
+    const pc = ((rawMidi % 12) + 12) % 12;
+    if (!pcs.includes(pc)) pcs.push(pc);
+  }
+  if (pcs.length === 0) return; // keep last detected key when nothing is playing
+  const root = detectRoot(pcs);
+  if (root !== null) store.set('key', root);
 }
 
 function refreshAllFrequencies(): void {
@@ -203,6 +224,7 @@ export function createKeyboard(): HTMLElement {
     }
     pointerMap.set(e.pointerId, { voiceKey: buildVoiceKey(rawMidi), rawMidi });
     startKey(rawMidi);
+    onNotesChanged();
     try { wrap.setPointerCapture(e.pointerId); } catch {}
   });
 
@@ -222,6 +244,7 @@ export function createKeyboard(): HTMLElement {
       startKey(newMidi);
       entry.rawMidi = newMidi;
       entry.voiceKey = buildVoiceKey(newMidi);
+      onNotesChanged();
     }
   });
 
@@ -231,6 +254,7 @@ export function createKeyboard(): HTMLElement {
     if (!entry) return;
     stopKey(entry.rawMidi);
     pointerMap.delete(e.pointerId);
+    onNotesChanged();
     try { wrap.releasePointerCapture(e.pointerId); } catch {}
   };
   wrap.addEventListener('pointerup', release);
