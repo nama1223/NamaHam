@@ -11,15 +11,16 @@ function getToneLabel(tone: ToneSpec): string {
 }
 
 // Note display order: C at top, then descending B → Bb → A → … → Db
-const NOTE_ORDER = [0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+const NOTE_ORDER: number[] = [0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
-// Key scroll order: -1 = auto, then same note order as NOTE_ORDER
-const KEY_SCROLL_ORDER = [-1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+// Key scroll order: C→B→Bb→…→Db→-1(auto)→(wrap to C)
+// Scroll up from C → auto(wrap); scroll down from Db → auto; scroll down from auto → C
+const KEY_SCROLL_ORDER: number[] = [0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1];
 
 function getKeyScrollPos(): number {
-  if (store.get('keyAuto')) return 0;
-  const idx = KEY_SCROLL_ORDER.indexOf(store.get('key') as typeof KEY_SCROLL_ORDER[number]);
-  return idx < 0 ? 1 : idx;
+  if (store.get('keyAuto')) return KEY_SCROLL_ORDER.indexOf(-1);
+  const idx = KEY_SCROLL_ORDER.indexOf(store.get('key'));
+  return idx < 0 ? 0 : idx;
 }
 function applyKeyScrollPos(pos: number): void {
   const len = KEY_SCROLL_ORDER.length;
