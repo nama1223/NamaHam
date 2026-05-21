@@ -256,7 +256,8 @@ export function createBottomBar(): HTMLElement {
 
   const refreshKeyText = () => {
     if (store.get('keyAuto')) {
-      keyText.textContent = t(getLang(), 'keyAuto') + ':' + NOTE_NAMES_FLAT[store.get('key')];
+      keyText.textContent =
+        t(getLang(), 'keyAuto') + ':' + NOTE_NAMES_FLAT[store.get('key')] + store.get('chordSuffix');
     } else {
       keyText.textContent = NOTE_NAMES_FLAT[store.get('key')];
     }
@@ -293,6 +294,7 @@ export function createBottomBar(): HTMLElement {
   });
   store.on('key', refreshKeyText);
   store.on('keyAuto', refreshKeyText);
+  store.on('chordSuffix', refreshKeyText);
   store.on('lang', refreshKeyText);
 
   const tempBtn = document.createElement('div');

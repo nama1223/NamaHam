@@ -14,6 +14,7 @@ export interface AppState {
   themeIndex: number;
   wakeLock: boolean;
   lang: 'ja' | 'en';
+  chordSuffix: string;      // current detected chord suffix in auto mode (e.g. "m7")
 }
 
 const DEFAULT_STATE: AppState = {
@@ -30,6 +31,7 @@ const DEFAULT_STATE: AppState = {
   themeIndex: 0,
   wakeLock: false,
   lang: 'ja',
+  chordSuffix: '',
 };
 
 type Listener<K extends keyof AppState> = (value: AppState[K], key: K) => void;
@@ -43,6 +45,7 @@ class StateStore {
     this.data = loadJson<AppState>(DEFAULT_STATE);
     this.data.sustain = false;
     this.data.rootMode = false;
+    this.data.chordSuffix = '';
   }
 
   save(): void {

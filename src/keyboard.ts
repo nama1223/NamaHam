@@ -1,7 +1,7 @@
 import { store, NOTE_NAMES_FLAT } from './state';
 import { audio } from './tones';
 import { noteFreq, pcToName } from './pitch';
-import { detectRoot } from './chord';
+import { detectRoot, detectChordSuffix } from './chord';
 
 const ROWS_FROM_TOP = [5, 4, 3, 2];
 const WHITE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
@@ -110,20 +110,41 @@ function clearSustained(): void {
   sustainedKeys.clear();
 }
 
-/** Called after any note start/stop to update the auto-detected key. */
+/**
+ * Called after any note start/stop to update auto-detected key and chord name.
+ * Uses (rawMidi + transpose) so detection is based on the SOUNDING pitches,
+ * not the visible keyboard positions.
+ */
 function onNotesChanged(): void {
-  if (!store.get('keyAuto')) return;
-  const pcs: number[] = [];
+  const transpose = store.get('transpose');
+  const midis: number[] = [];
+
   for (const entry of pointerMap.values()) {
-    pcs.push(((entry.rawMidi % 12) + 12) % 12);
+    midis.push(entry.rawMidi + transpose);
   }
   for (const rawMidi of sustainedKeys.values()) {
-    const pc = ((rawMidi % 12) + 12) % 12;
-    if (!pcs.includes(pc)) pcs.push(pc);
+    const midi = rawMidi + transpose;
+    if (!midis.includes(midi)) midis.push(midi);
   }
-  if (pcs.length === 0) return; // keep last detected key when nothing is playing
-  const root = detectRoot(pcs);
-  if (root !== null) store.set('key', root);
+
+  if (!store.get('keyAuto')) {
+    if (store.get('chordSuffix') !== '') store.set('chordSuffix', '');
+    return;
+  }
+
+  if (midis.length === 0) {
+    // Keep last detected key, but clear the chord-name suffix
+    if (store.get('chordSuffix') !== '') store.set('chordSuffix', '');
+    return;
+  }
+
+  const root = detectRoot(midis);
+  if (root === null) return;
+  if (root !== store.get('key')) store.set('key', root);
+
+  const pcs = midis.map((m) => ((m % 12) + 12) % 12);
+  const suffix = detectChordSuffix(pcs, root);
+  if (suffix !== store.get('chordSuffix')) store.set('chordSuffix', suffix);
 }
 
 function refreshAllFrequencies(): void {
@@ -207,9 +228,11 @@ export function createKeyboard(): HTMLElement {
 
   store.on('octaveOffset', refreshAllFrequencies);
   store.on('transpose', refreshAllFrequencies);
+  store.on('transpose', onNotesChanged); // re-detect key when transpose changes
   store.on('concertPitch', refreshAllFrequencies);
   store.on('temperament', refreshAllFrequencies);
   store.on('key', refreshAllFrequencies);
+  store.on('keyAuto', onNotesChanged);   // re-detect or clear suffix on mode toggle
   store.on('sustain', (on) => { if (!on) clearSustained(); });
 
   wrap.addEventListener('pointerdown', (e: PointerEvent) => {
@@ -283,6 +306,7 @@ export function stopAllKeyboard(): void {
   }
   pointerMap.clear();
   clearSustained();
+  onNotesChanged(); // clear chord suffix
 }
 
 export function setKeyboardKeyHighlight(pc: number, active: boolean): void {
