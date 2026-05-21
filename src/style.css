@@ -301,7 +301,7 @@ body {
   line-height: 1.05;
 }
 .bottombar .root-btn {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   font-size: 18px;
   background: color-mix(in srgb, var(--footer-text) 12%, transparent);
   color: var(--footer-text);
@@ -350,7 +350,7 @@ body {
   border-radius: 14px;
   max-width: 88vw;
   width: 280px;
-  max-height: 70vh;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
