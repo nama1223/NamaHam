@@ -282,14 +282,23 @@ body {
 .bottombar {
   background: var(--footer-bg);
   color: var(--footer-text);
-  padding: 8px;
+  padding: 8px 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 3px;
   border-top: none;
 }
 .bottombar .b-label {
   color: var(--footer-text);
+  padding: 0;
+}
+.bottombar .pill {
+  white-space: nowrap;
+}
+.bottombar .key-pill {
+  padding: 4px 8px;
+  min-width: 56px;
+  line-height: 1.05;
 }
 .bottombar .root-btn {
   flex: 1 1 auto;
@@ -593,6 +602,15 @@ body {
     padding-left: calc(10px + 1em);
     padding-right: calc(10px + 1em);
   }
+}
+
+/* Key pill font-size scaling for long chord names (placed after media
+   queries so .pill.key-fs-* wins specificity-wise) */
+.pill.key-fs-sm { font-size: 18px; }
+.pill.key-fs-xs { font-size: 15px; }
+@media (max-width: 480px) {
+  .pill.key-fs-sm { font-size: 14px; }
+  .pill.key-fs-xs { font-size: 12px; }
 }
 
 @media (orientation: landscape) and (max-height: 480px) {

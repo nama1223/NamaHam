@@ -250,16 +250,22 @@ export function createBottomBar(): HTMLElement {
   bot.appendChild(keyLabel);
 
   const keyBtn = document.createElement('div');
-  keyBtn.className = 'pill scroll-target';
+  keyBtn.className = 'pill scroll-target key-pill';
   keyBtn.setAttribute('role', 'button');
   const keyText = document.createElement('span');
 
   const refreshKeyText = () => {
     if (store.get('keyAuto')) {
+      const suffix = store.get('chordSuffix');
       keyText.textContent =
-        t(getLang(), 'keyAuto') + ':' + NOTE_NAMES_FLAT[store.get('key')] + store.get('chordSuffix');
+        t(getLang(), 'keyAuto') + ':' + NOTE_NAMES_FLAT[store.get('key')] + suffix;
+      // Drop font size for long suffixes (sus/dim/aug etc.)
+      keyBtn.classList.remove('key-fs-sm', 'key-fs-xs');
+      if (suffix.length >= 5) keyBtn.classList.add('key-fs-xs');
+      else if (suffix.length >= 3) keyBtn.classList.add('key-fs-sm');
     } else {
       keyText.textContent = NOTE_NAMES_FLAT[store.get('key')];
+      keyBtn.classList.remove('key-fs-sm', 'key-fs-xs');
     }
   };
   refreshKeyText();
