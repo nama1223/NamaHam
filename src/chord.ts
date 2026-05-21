@@ -47,7 +47,7 @@ export function detectRoot(midis: number[]): number | null {
       const interval = (pc - root + 12) % 12;
       score += INTERVAL_WEIGHT[interval] ?? 0;
     }
-    if (root === bassPc) score += 1; // bass-note bonus
+    if (root === bassPc) score += 4; // bass-note bonus (raised to overcome 9th-chord false positives)
     if (score > bestScore) {
       bestScore = score;
       bestRoot = root;
