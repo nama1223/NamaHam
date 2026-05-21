@@ -79,11 +79,19 @@ interface Voice {
   gain: GainNode;
 }
 
+interface Zombie {
+  osc: OscillatorNode;
+  gain: GainNode;
+  timer: ReturnType<typeof setTimeout>;
+}
+
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private periodicWave: PeriodicWave | null = null;
   private voices = new Map<string, Voice>();
+  /** Voices in release phase (stop() called but oscillator still alive) */
+  private zombies = new Map<string, Zombie>();
   private currentTone: ToneSpec = TONES[0];
   private currentVolume = 0.6;
 
@@ -129,6 +137,22 @@ export class AudioEngine {
   start(voiceId: string, freq: number): void {
     const ctx = this.ensureContext();
     if (this.voices.has(voiceId)) return;
+
+    // If a zombie (released-but-still-decaying) voice exists for this id,
+    // revive it instead of spawning a new oscillator.
+    // This prevents phase-offset clicks caused by two overlapping oscillators.
+    const zombie = this.zombies.get(voiceId);
+    if (zombie) {
+      clearTimeout(zombie.timer);
+      this.zombies.delete(voiceId);
+      const now = ctx.currentTime;
+      zombie.osc.frequency.setTargetAtTime(freq, now, 0.003);
+      zombie.gain.gain.cancelScheduledValues(now);
+      zombie.gain.gain.setTargetAtTime(this.currentTone.gain, now, this.currentTone.attack);
+      this.voices.set(voiceId, { osc: zombie.osc, gain: zombie.gain });
+      return;
+    }
+
     if (!this.periodicWave || !this.master) return;
     const gain = ctx.createGain();
     const now = ctx.currentTime;
@@ -151,22 +175,34 @@ export class AudioEngine {
     v.gain.gain.cancelScheduledValues(now);
     v.gain.gain.setTargetAtTime(0, now, this.currentTone.release);
     const tail = (this.currentTone.release * 6 + 0.1) * 1000;
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      this.zombies.delete(voiceId);
       try { v.osc.stop(); } catch {}
       try { v.osc.disconnect(); } catch {}
       try { v.gain.disconnect(); } catch {}
     }, tail);
+    // Keep the decaying voice as a zombie so start() can revive it cleanly
+    this.zombies.set(voiceId, { osc: v.osc, gain: v.gain, timer });
   }
 
   setFrequency(voiceId: string, freq: number): void {
     const v = this.voices.get(voiceId);
     if (!v || !this.ctx) return;
     const now = this.ctx.currentTime;
-    v.osc.frequency.setTargetAtTime(freq, now, 0.005);
+    // 15 ms time constant — smooth enough to avoid audible wobble on JI retuning
+    v.osc.frequency.setTargetAtTime(freq, now, 0.015);
   }
 
   stopAll(): void {
     for (const id of Array.from(this.voices.keys())) this.stop(id);
+    // Also immediately kill any zombies (app-level stop, no need to revive)
+    for (const [, z] of this.zombies) {
+      clearTimeout(z.timer);
+      try { z.osc.stop(); } catch {}
+      try { z.osc.disconnect(); } catch {}
+      try { z.gain.disconnect(); } catch {}
+    }
+    this.zombies.clear();
   }
 }
 
