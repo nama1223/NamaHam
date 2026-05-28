@@ -226,7 +226,14 @@ export function createKeyboard(): HTMLElement {
   updateLabels();
   store.on('octaveOffset', updateLabels);
 
-  store.on('octaveOffset', refreshAllFrequencies);
+  // octaveOffset: only retune actively-held (pointer) notes.
+  // Sustained notes keep their original pitch — changing the displayed range
+  // must not silently shift notes the user intentionally held.
+  store.on('octaveOffset', () => {
+    for (const entry of pointerMap.values()) {
+      audio.setFrequency(entry.voiceKey, effectiveFreq(entry.rawMidi));
+    }
+  });
   store.on('transpose', refreshAllFrequencies);
   store.on('transpose', onNotesChanged); // re-detect key when transpose changes
   store.on('concertPitch', refreshAllFrequencies);

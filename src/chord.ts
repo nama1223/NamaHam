@@ -37,6 +37,15 @@ export function detectRoot(midis: number[]): number | null {
   for (const m of midis) if (m < lowestMidi) lowestMidi = m;
   const bassPc = ((lowestMidi % 12) + 12) % 12;
 
+  // Bass bonus: +4 when bass is likely the root, 0 when bass is likely the 5th.
+  // If a chord tone exists at (bassPc - 7) mod 12 — i.e. a note a P5 below the bass —
+  // the bass is probably the chord's 5th (second-inversion voicing), so no bonus.
+  // Example: C-F-A → bass=C, F is a P5 below C → bassIsAFifth → bonus=0, F wins.
+  // Example: C9    → bass=C, no P5 below C in chord → bonus=4, C wins over G.
+  const potentialRootOfBass = ((bassPc - 7) + 12) % 12;
+  const bassIsAFifth = pcs.includes(potentialRootOfBass);
+  const bassBonus = bassIsAFifth ? 0 : 4;
+
   let bestRoot = pcs[0];
   let bestScore = -Infinity;
 
@@ -47,7 +56,7 @@ export function detectRoot(midis: number[]): number | null {
       const interval = (pc - root + 12) % 12;
       score += INTERVAL_WEIGHT[interval] ?? 0;
     }
-    if (root === bassPc) score += 4; // bass-note bonus (raised to overcome 9th-chord false positives)
+    if (root === bassPc) score += bassBonus;
     if (score > bestScore) {
       bestScore = score;
       bestRoot = root;
