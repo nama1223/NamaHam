@@ -108,7 +108,13 @@ function handleSustainTap(rawMidi: number): void {
     setKeyVisualActive(rawMidi, false);
     onNotesChanged();
   } else {
-    const voiceKey = buildVoiceKey(rawMidi);
+    // Key the voice by effective MIDI (not rawMidi) so that after an octave
+    // shift, pressing a different physical key at the same position never
+    // collides with the sustained note that moved there.
+    // e.g. C3 pressed at octaveOffset=-2 → voiceKey="s48";
+    //      after offset→-1 the same rawMidi now sounds C4 → voiceKey="s60" (no clash)
+    const effectiveMidi = rawMidi + store.get('transpose') + store.get('octaveOffset') * 12;
+    const voiceKey = `s${effectiveMidi}`;
     sustainedKeys.set(voiceKey, rawMidi); // displayMidi = rawMidi at press time
     audio.start(voiceKey, effectiveFreq(rawMidi));
     setKeyVisualActive(rawMidi, true);
