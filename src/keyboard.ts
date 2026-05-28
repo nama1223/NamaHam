@@ -21,7 +21,18 @@ interface ActivePointer {
 }
 
 const pointerMap = new Map<number, ActivePointer>();
+// Key = voiceKey ("n{origRawMidi}") — stable, used for audio.stop/setFrequency
+// Value = displayMidi — visual key position, shifts with octaveOffset
 const sustainedKeys = new Map<string, number>();
+let prevOctaveOffset = 0; // synced in createKeyboard()
+
+/** Find the voiceKey of a sustained note currently displayed at displayMidi. */
+function findSustainedByDisplay(displayMidi: number): string | undefined {
+  for (const [vk, dm] of sustainedKeys) {
+    if (dm === displayMidi) return vk;
+  }
+  return undefined;
+}
 
 function buildVoiceKey(rawMidi: number): string {
   return `n${rawMidi}`;
@@ -88,14 +99,17 @@ function handleSustainTap(rawMidi: number): void {
     flashKey(rawMidi);
     return;
   }
-  const voiceKey = buildVoiceKey(rawMidi);
-  if (sustainedKeys.has(rawMidi.toString())) {
-    sustainedKeys.delete(rawMidi.toString());
-    audio.stop(voiceKey);
+  // Look up by current display position (displayMidi may differ from origRawMidi
+  // if octaveOffset changed while this note was held).
+  const existingKey = findSustainedByDisplay(rawMidi);
+  if (existingKey !== undefined) {
+    sustainedKeys.delete(existingKey);
+    audio.stop(existingKey);
     setKeyVisualActive(rawMidi, false);
     onNotesChanged();
   } else {
-    sustainedKeys.set(rawMidi.toString(), rawMidi);
+    const voiceKey = buildVoiceKey(rawMidi);
+    sustainedKeys.set(voiceKey, rawMidi); // displayMidi = rawMidi at press time
     audio.start(voiceKey, effectiveFreq(rawMidi));
     setKeyVisualActive(rawMidi, true);
     onNotesChanged();
@@ -103,9 +117,9 @@ function handleSustainTap(rawMidi: number): void {
 }
 
 function clearSustained(): void {
-  for (const rawMidi of Array.from(sustainedKeys.values())) {
-    audio.stop(buildVoiceKey(rawMidi));
-    setKeyVisualActive(rawMidi, false);
+  for (const [vk, displayMidi] of Array.from(sustainedKeys.entries())) {
+    audio.stop(vk);
+    setKeyVisualActive(displayMidi, false);
   }
   sustainedKeys.clear();
 }
@@ -151,8 +165,10 @@ function refreshAllFrequencies(): void {
   for (const entry of pointerMap.values()) {
     audio.setFrequency(entry.voiceKey, effectiveFreq(entry.rawMidi));
   }
-  for (const rawMidi of sustainedKeys.values()) {
-    audio.setFrequency(buildVoiceKey(rawMidi), effectiveFreq(rawMidi));
+  // Use displayMidi so that effectiveFreq() computes the ORIGINAL sounding pitch
+  // even after octaveOffset has changed (displayMidi is already adjusted).
+  for (const [vk, displayMidi] of sustainedKeys) {
+    audio.setFrequency(vk, effectiveFreq(displayMidi));
   }
 }
 
@@ -224,14 +240,29 @@ export function createKeyboard(): HTMLElement {
     });
   };
   updateLabels();
+  prevOctaveOffset = store.get('octaveOffset');
   store.on('octaveOffset', updateLabels);
 
-  // octaveOffset: only retune actively-held (pointer) notes.
-  // Sustained notes keep their original pitch — changing the displayed range
-  // must not silently shift notes the user intentionally held.
-  store.on('octaveOffset', () => {
+  store.on('octaveOffset', (newOff) => {
+    const delta = newOff - prevOctaveOffset;
+    prevOctaveOffset = newOff;
+
+    // Pointer-held notes: retune to new octave as usual
     for (const entry of pointerMap.values()) {
       audio.setFrequency(entry.voiceKey, effectiveFreq(entry.rawMidi));
+    }
+
+    // Sustained notes: shift the DISPLAY position by -delta octaves.
+    // The audio voice is untouched — pitch stays exactly as pressed.
+    // If the new display position is off the keyboard it simply has no visual
+    // indicator, but the note keeps playing until the user stops it.
+    for (const [vk, displayMidi] of Array.from(sustainedKeys.entries())) {
+      setKeyVisualActive(displayMidi, false);            // remove old highlight
+      const newDisplay = displayMidi - delta * 12;
+      sustainedKeys.set(vk, newDisplay);               // update display position
+      if (document.querySelector(`[data-midi="${newDisplay}"]`)) {
+        setKeyVisualActive(newDisplay, true);           // highlight new position
+      }
     }
   });
   store.on('transpose', refreshAllFrequencies);
