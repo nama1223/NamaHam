@@ -260,14 +260,18 @@ export function createKeyboard(): HTMLElement {
 
     // Sustained notes: shift the DISPLAY position by -delta octaves.
     // The audio voice is untouched — pitch stays exactly as pressed.
-    // If the new display position is off the keyboard it simply has no visual
-    // indicator, but the note keeps playing until the user stops it.
+    // Two-pass: remove ALL old highlights first, then add new ones.
+    // Without this, iterating order can cause a removal in pass N to wipe out
+    // a highlight that was just added in pass N-1 when two notes' display
+    // positions cross each other during the shift (e.g. C4→72 then C5 removes 72).
+    for (const displayMidi of sustainedKeys.values()) {
+      setKeyVisualActive(displayMidi, false);
+    }
     for (const [vk, displayMidi] of Array.from(sustainedKeys.entries())) {
-      setKeyVisualActive(displayMidi, false);            // remove old highlight
       const newDisplay = displayMidi - delta * 12;
-      sustainedKeys.set(vk, newDisplay);               // update display position
+      sustainedKeys.set(vk, newDisplay);
       if (document.querySelector(`[data-midi="${newDisplay}"]`)) {
-        setKeyVisualActive(newDisplay, true);           // highlight new position
+        setKeyVisualActive(newDisplay, true);
       }
     }
   });
