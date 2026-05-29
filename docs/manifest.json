@@ -6,7 +6,7 @@
   "background_color": "#000000",
   "theme_color": "#ede3cc",
   "icons": [
-    {"src": "NamaHam192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "NamaHam512.png", "sizes": "512x512", "type": "image/png"}
+    {"src": "NamaHam192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "NamaHam512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
   ]
 }

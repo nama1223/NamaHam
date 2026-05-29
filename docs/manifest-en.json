@@ -6,7 +6,7 @@
   "background_color": "#000000",
   "theme_color": "#ede3cc",
   "icons": [
-    {"src": "NamaHarmony192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "NamaHarmony512.png", "sizes": "512x512", "type": "image/png"}
+    {"src": "NamaHarmony192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "NamaHarmony512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
   ]
 }
