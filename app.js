@@ -128,6 +128,20 @@ const STRINGS = {
     toneModal: '音色',
     keyModal: '調（純正律）',
     keyAuto: '自動',
+    install: 'インストール',
+    installBtn: '📲 アプリとしてインストール',
+    installedBtn: '✓ インストール済',
+    installedTitle: 'インストール済み',
+    installedBody: 'このアプリはすでにインストールされています。',
+    installGateTitle: 'NamaHamのみインストールしますか？',
+    installGateBody: 'このインストールボタンは、NamaHamを単独でホーム画面に追加するためのものです。メトロノーム・チューナーも含む統合アプリ「NamaSound+」が欲しい場合は、左上の⚙アイコンではなくNamaSound+側の設定からインストールしてください。',
+    installGateCancel: 'キャンセル',
+    installGateProceed: 'NamaHamだけインストール',
+    installIOSTitle: 'iOSへのインストール方法',
+    installIOSBody: '<p>Safariでこのページを開いてください。</p><ol><li>画面下部の<strong>共有ボタン（□↑）</strong>をタップ</li><li>「<strong>ホーム画面に追加</strong>」を選択</li><li>右上の「<strong>追加</strong>」をタップ</li></ol><p style="margin-top:8px;font-size:12px;color:var(--sub-text)">※ Chrome・Firefoxでは対応していません。</p>',
+    installGenericTitle: 'インストール方法',
+    installGenericBody: '<ol><li><strong>Chrome：</strong>アドレスバー右端の「⊕」または「⋮」→「アプリをインストール」</li><li><strong>Edge：</strong>「…」→「アプリ」→「このサイトをアプリとしてインストール」</li><li><strong>Safari（Mac）：</strong>メニュー File →「Dockに追加」</li></ol><p style="margin-top:8px;font-size:12px;color:var(--sub-text)">FirefoxはPWAインストールに対応していません。</p>',
+    installModalClose: '閉じる',
   },
   en: {
     transpose: 'Xpose',
@@ -152,6 +166,20 @@ const STRINGS = {
     toneModal: 'Tone',
     keyModal: 'Key (Just Tuning)',
     keyAuto: 'Auto',
+    install: 'Install',
+    installBtn: '📲 Install as App',
+    installedBtn: '✓ Installed',
+    installedTitle: 'Already Installed',
+    installedBody: 'This app is already installed.',
+    installGateTitle: 'Install NamaHam only?',
+    installGateBody: 'This install button adds only NamaHam to your home screen. If you want the combined "NamaSound+" app (which also includes the metronome and tuner), please install it from NamaSound+\u2019s own settings instead of this \u2699 icon.',
+    installGateCancel: 'Cancel',
+    installGateProceed: 'Install NamaHam only',
+    installIOSTitle: 'How to Install on iOS',
+    installIOSBody: '<p>Please open this page in Safari.</p><ol><li>Tap the <strong>Share button (□↑)</strong> at the bottom of the screen</li><li>Select "<strong>Add to Home Screen</strong>"</li><li>Tap "<strong>Add</strong>" at the top right</li></ol><p style="margin-top:8px;font-size:12px;color:var(--sub-text)">Not supported in Chrome or Firefox.</p>',
+    installGenericTitle: 'How to Install',
+    installGenericBody: '<ol><li><strong>Chrome:</strong> "⊕" or "⋮" at the right of the address bar → "Install app"</li><li><strong>Edge:</strong> "…" → "Apps" → "Install this site as an app"</li><li><strong>Safari (Mac):</strong> File menu → "Add to Dock"</li></ol><p style="margin-top:8px;font-size:12px;color:var(--sub-text)">Firefox does not support PWA install.</p>',
+    installModalClose: 'Close',
   },
 };
 
@@ -1344,17 +1372,41 @@ function createSettingsScreen() {
   const body = document.createElement('div');
   body.className = 'settings-body';
 
+  // ---- インストール ----
+  const installBlock = document.createElement('div');
+  installBlock.className = 'setting-block install-block';
+  const installBtn = document.createElement('button');
+  installBtn.className = 'install-btn';
+  const refreshInstallBtn = () => {
+    const lang = store.get('lang');
+    if (isStandaloneDisplay()) {
+      installBtn.textContent = t(lang, 'installedBtn');
+      installBtn.classList.add('installed');
+      installBtn.disabled = true;
+    } else {
+      installBtn.textContent = t(lang, 'installBtn');
+      installBtn.classList.remove('installed');
+      installBtn.disabled = false;
+    }
+  };
+  refreshInstallBtn();
+  installBtn.addEventListener('click', () => { void runInstallFlow(); });
+  window.addEventListener('namaham:install-availability-changed', refreshInstallBtn);
+  store.on('lang', refreshInstallBtn);
+  installBlock.appendChild(installBtn);
+  body.appendChild(installBlock);
+
   // ---- 言語 ----
   const langBlock = document.createElement('div');
-  langBlock.className = 'setting-block';
+  langBlock.className = 'setting-block setting-block-inline';
   const langLabel = document.createElement('div');
-  langLabel.className = 'setting-label';
+  langLabel.className = 'setting-label setting-label-inline';
   langLabel.dataset.i18n = 'language';
   langLabel.textContent = t(store.get('lang'), 'language');
   langBlock.appendChild(langLabel);
 
   const langRow = document.createElement('div');
-  langRow.className = 'lang-row';
+  langRow.className = 'lang-row lang-row-inline';
   ['ja', 'en'].forEach((lang) => {
     const btn = document.createElement('button');
     btn.className = 'lang-btn';
@@ -1429,12 +1481,12 @@ function createSettingsScreen() {
 
   // ---- コンサートピッチ ----
   const pitchBlock = document.createElement('div');
-  pitchBlock.className = 'setting-block';
+  pitchBlock.className = 'setting-block setting-block-inline';
   const pitchLabel = document.createElement('div');
-  pitchLabel.className = 'setting-label';
+  pitchLabel.className = 'setting-label setting-label-inline';
   pitchLabel.textContent = t(store.get('lang'), 'concertPitch');
   const pitchRow = document.createElement('div');
-  pitchRow.className = 'pitch-row';
+  pitchRow.className = 'pitch-row pitch-row-inline';
 
   const minusBtn = document.createElement('button');
   minusBtn.className = 'pitch-step'; minusBtn.textContent = '−';
@@ -1532,6 +1584,173 @@ function createSettingsScreen() {
 }
 
 // =====================================================================
+// install.ts — PWA インストールボタン
+// =====================================================================
+let deferredInstallPrompt = null;
+let isInsideNamaSoundPlus = false;
+
+const isIOSDevice = /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios/i.test(navigator.userAgent);
+const isStandaloneDisplay = () =>
+  window.matchMedia('(display-mode: standalone)').matches
+  || ('standalone' in navigator && navigator.standalone === true);
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  window.dispatchEvent(new CustomEvent('namaham:install-availability-changed'));
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  window.dispatchEvent(new CustomEvent('namaham:install-availability-changed'));
+});
+
+window.addEventListener('namaham:enter-hostcontext', () => {
+  isInsideNamaSoundPlus = true;
+  window.dispatchEvent(new CustomEvent('namaham:install-availability-changed'));
+});
+
+function openInfoModal(title, bodyHTML) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const sheet = document.createElement('div');
+  sheet.className = 'modal-sheet';
+  sheet.style.width = '300px';
+
+  const header = document.createElement('div');
+  header.className = 'modal-title';
+  header.textContent = title;
+  sheet.appendChild(header);
+
+  const body = document.createElement('div');
+  body.style.padding = '14px 16px';
+  body.style.fontSize = '13px';
+  body.style.lineHeight = '1.8';
+  body.style.color = 'var(--sub-text)';
+  body.innerHTML = bodyHTML;
+  sheet.appendChild(body);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = t(store.get('lang'), 'installModalClose');
+  closeBtn.style.cssText = 'margin:0 16px 16px;padding:11px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
+  closeBtn.addEventListener('click', close);
+  sheet.appendChild(closeBtn);
+
+  function close() {
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 160);
+  }
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('shown'));
+}
+
+function openConfirmModal(title, bodyText, cancelLabel, proceedLabel, onProceed) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const sheet = document.createElement('div');
+  sheet.className = 'modal-sheet';
+  sheet.style.width = '300px';
+
+  const header = document.createElement('div');
+  header.className = 'modal-title';
+  header.textContent = title;
+  sheet.appendChild(header);
+
+  const body = document.createElement('div');
+  body.style.padding = '14px 16px';
+  body.style.fontSize = '13px';
+  body.style.lineHeight = '1.8';
+  body.style.color = 'var(--sub-text)';
+  body.textContent = bodyText;
+  sheet.appendChild(body);
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;padding:0 16px 16px;';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = cancelLabel;
+  cancelBtn.style.cssText = 'flex:1;padding:11px;border:2px solid var(--panel-border);border-radius:8px;background:transparent;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;';
+  cancelBtn.addEventListener('click', close);
+
+  const proceedBtn = document.createElement('button');
+  proceedBtn.textContent = proceedLabel;
+  proceedBtn.style.cssText = 'flex:1;padding:11px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;';
+  proceedBtn.addEventListener('click', () => { close(); onProceed(); });
+
+  btnRow.append(cancelBtn, proceedBtn);
+  sheet.appendChild(btnRow);
+
+  function close() {
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 160);
+  }
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('shown'));
+}
+
+async function runInstallFlow() {
+  const lang = store.get('lang');
+
+  if (isStandaloneDisplay()) {
+    openInfoModal(t(lang, 'installedTitle'), t(lang, 'installedBody'));
+    return;
+  }
+
+  // 直接インストール可能な環境（Chrome/Edge 等）かどうか
+  const canPromptDirectly = !!deferredInstallPrompt;
+
+  const doDirectPrompt = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      deferredInstallPrompt = null;
+      window.dispatchEvent(new CustomEvent('namaham:install-availability-changed'));
+    }
+  };
+
+  const showFallbackGuide = () => {
+    if (isIOSDevice) {
+      openInfoModal(t(lang, 'installIOSTitle'), t(lang, 'installIOSBody'));
+    } else {
+      openInfoModal(t(lang, 'installGenericTitle'), t(lang, 'installGenericBody'));
+    }
+  };
+
+  if (isInsideNamaSoundPlus) {
+    if (canPromptDirectly) {
+      // 直接インストール可能な環境: 確認ダイアログを割り込み表示
+      openConfirmModal(
+        t(lang, 'installGateTitle'),
+        t(lang, 'installGateBody'),
+        t(lang, 'installGateCancel'),
+        t(lang, 'installGateProceed'),
+        doDirectPrompt,
+      );
+    } else {
+      // 直接インストール不可の環境: キャンセル/続行の選択肢は出さず、
+      // 案内文の前に説明メッセージを続けて表示する
+      const lang2 = store.get('lang');
+      const combinedBody = `<p style="margin-bottom:10px">${t(lang2, 'installGateBody')}</p>`
+        + (isIOSDevice ? t(lang2, 'installIOSBody') : t(lang2, 'installGenericBody'));
+      openInfoModal(isIOSDevice ? t(lang2, 'installIOSTitle') : t(lang2, 'installGenericTitle'), combinedBody);
+    }
+    return;
+  }
+
+  if (canPromptDirectly) {
+    await doDirectPrompt();
+    return;
+  }
+
+  showFallbackGuide();
+}
+
+// =====================================================================
 // main.ts — エントリポイント
 // =====================================================================
 function applyManifest(lang) {
@@ -1569,11 +1788,24 @@ window.addEventListener('pointerdown', initAudioOnce, { passive: true });
 window.addEventListener('keydown',     initAudioOnce);
 
 // ===== NamaSound+ 親フレーム連携 =====
+// ダブルドメイン対応: nama1223.com / nama1223.github.io のどちらから
+// 開かれていても親からのメッセージを受け取れるよう許可リスト化する。
+const ALLOWED_PARENT_ORIGINS = [
+  'https://nama1223.com',
+  'https://nama1223.github.io',
+  'http://nama1223.github.io',
+];
+
 window.addEventListener('message', (event) => {
-  if (event.origin !== 'https://nama1223.github.io') return;
+  if (!ALLOWED_PARENT_ORIGINS.includes(event.origin)) return;
   const msg = event.data;
   if (!msg || typeof msg !== 'object') return;
   switch (msg.type) {
+    case 'setHostContext':
+      if (msg.host === 'namasoundplus') {
+        window.dispatchEvent(new CustomEvent('namaham:enter-hostcontext'));
+      }
+      break;
     case 'setLanguage': {
       const lang = msg.lang;
       if (lang === 'ja' || lang === 'en') store.set('lang', lang);

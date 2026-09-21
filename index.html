@@ -437,20 +437,77 @@ body {
   line-height: 1;
 }
 .settings-body {
-  padding: 14px;
+  padding: 12px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 .setting-block {
   background: color-mix(in srgb, var(--text) 5%, transparent);
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 10px;
 }
 .setting-label {
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+/* Condensed inline blocks: label + control on one row */
+.setting-block-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.setting-label-inline {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.lang-row-inline {
+  flex: 0 0 auto;
+  width: auto;
+  gap: 6px;
+}
+.lang-row-inline .lang-btn {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.pitch-row-inline {
+  flex: 0 0 auto;
+  gap: 6px;
+}
+.pitch-row-inline .pitch-step {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+}
+.pitch-row-inline .pitch-value {
+  padding: 4px 10px;
+  font-size: 15px;
+  min-width: 84px;
+}
+
+/* Install button */
+.install-block {
+  padding: 8px;
+}
+.install-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.install-btn.installed {
+  background: color-mix(in srgb, var(--text) 20%, transparent);
+  color: var(--sub-text);
+  cursor: default;
 }
 
 /* Language toggle */
@@ -551,18 +608,18 @@ body {
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 .theme-cell {
   background: transparent;
   border: 2px solid transparent;
-  padding: 6px;
+  padding: 4px;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   color: var(--text);
 }
 .theme-cell.active {
@@ -571,7 +628,7 @@ body {
 }
 .theme-swatch {
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 5 / 2;
   display: flex;
   border-radius: 8px;
   overflow: hidden;
