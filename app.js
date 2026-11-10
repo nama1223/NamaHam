@@ -1358,15 +1358,19 @@ function createSettingsScreen() {
   // ヘッダー
   const header  = document.createElement('div');
   header.className = 'settings-header';
-  const titleEl = document.createElement('div');
+  const titleEl = document.createElement('button');
   titleEl.className = 'settings-title';
+  titleEl.style.cssText = 'border:0;background:none;color:var(--accent);padding:4px 0;cursor:pointer';
   titleEl.dataset.i18n = 'settings';
   titleEl.textContent = t(store.get('lang'), 'settings');
   const closeBtn = document.createElement('button');
   closeBtn.className = 'settings-close';
   closeBtn.textContent = '×';
   closeBtn.addEventListener('click', hide);
-  header.append(titleEl, closeBtn);
+  const infoTab = document.createElement('button');
+  infoTab.textContent = 'アプリ情報';
+  infoTab.style.cssText = 'border:0;background:none;color:var(--text);font:inherit;padding:4px 0;cursor:pointer';
+  header.append(titleEl, infoTab, closeBtn);
   panel.appendChild(header);
 
   const body = document.createElement('div');
@@ -1542,11 +1546,26 @@ function createSettingsScreen() {
   themeBlock.appendChild(themeGrid);
   body.appendChild(themeBlock);
 
-  panel.appendChild(body);
+  const infoBody = document.createElement('div');
+  infoBody.className = 'settings-body';
+  infoBody.style.display = 'none';
+  infoBody.innerHTML = `
+    <div class="setting-block" style="display:flex;flex-direction:column;gap:12px;line-height:1.7">
+      <a href="/" target="_blank" rel="noopener" style="display:block;opacity:.85"><img src="/NamaStudioLogoHalf.png" alt="Nama Studio" style="height:35px;width:auto;display:block"></a>
+      <div>配布元サイト：Nama Studio(ナマスタ)<br><a href="https://nama1223.com" target="_blank" rel="noopener">https://nama1223.com</a></div>
+      <div>（上記ドメインが消滅した場合はこちら）<br><a href="http://nama1223.github.io/" target="_blank" rel="noopener">http://nama1223.github.io/</a></div>
+      <div><a href="https://www.amazon.jp/hz/wishlist/ls/21PS61YG1P32B?ref_=wl_share" target="_blank" rel="noreferrer noopener" style="display:flex;align-items:center;text-decoration:none;opacity:.75"><span style="display:inline-block;width:85px;height:35px;background-image:url('https://m.media-amazon.com/images/G/09/gno/sprites/nav-sprite-global-1x-reorg-privacy._CB546377955_.png');background-position:-5px -85px;background-repeat:no-repeat;flex-shrink:0;background-color:#000"></span></a><span style="font-size:.8rem;font-weight:bold;opacity:.75">ほしいものリスト</span></div>
+    </div>`;
+  const selectSettingsTab = () => { body.style.display = ''; infoBody.style.display = 'none'; titleEl.style.color = 'var(--accent)'; infoTab.style.color = 'var(--text)'; };
+  const selectInfoTab = () => { body.style.display = 'none'; infoBody.style.display = ''; infoTab.style.color = 'var(--accent)'; titleEl.style.color = 'var(--text)'; };
+  titleEl.addEventListener('click', selectSettingsTab);
+  infoTab.addEventListener('click', selectInfoTab);
+  panel.append(body, infoBody);
   overlay.appendChild(panel);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) hide(); });
 
   function show() {
+    selectSettingsTab();
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('shown'));
   }
