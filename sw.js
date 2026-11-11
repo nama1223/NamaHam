@@ -1,4 +1,4 @@
-const CACHE_NAME = 'namaham-cache-v2';
+const CACHE_NAME = 'namaham-cache-v3';
 
 const urlsToCache = [
   './',

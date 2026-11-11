@@ -126,8 +126,10 @@ const STRINGS = {
     language: '言語',
     transposeModal: '移調',
     toneModal: '音色',
-    keyModal: '調（純正律）',
-    keyAuto: '自動',
+    keyModal: '調（純正律のピッチ調整）',
+    keyAuto: '自動判定',
+    tutorial: 'チュートリアル',
+    tutorialBtn: '案内ボタン（チュートリアル）を表示する',
     install: 'インストール',
     installBtn: '📲 アプリとしてインストール',
     installedBtn: '✓ インストール済',
@@ -164,8 +166,10 @@ const STRINGS = {
     language: 'Language',
     transposeModal: 'Transposition',
     toneModal: 'Tone',
-    keyModal: 'Key (Just Tuning)',
-    keyAuto: 'Auto',
+    keyModal: 'Key (Just Pitch Adjust)',
+    keyAuto: 'Auto Detect',
+    tutorial: 'Tutorial',
+    tutorialBtn: 'Show the guide button (tutorial)',
     install: 'Install',
     installBtn: '📲 Install as App',
     installedBtn: '✓ Installed',
@@ -782,7 +786,7 @@ function createTopBar() {
   row1.appendChild(transposeLabel);
 
   const transposeBtn = document.createElement('div');
-  transposeBtn.className = 'pill scroll-target';
+  transposeBtn.className = 'pill scroll-target ham-transpose-btn';
   transposeBtn.setAttribute('role', 'button');
   const transposeText = document.createElement('span');
   transposeText.textContent = NOTE_NAMES_FLAT[store.get('transpose')];
@@ -814,7 +818,7 @@ function createTopBar() {
   row1.appendChild(toneLabel);
 
   const toneBtn = document.createElement('div');
-  toneBtn.className = 'pill scroll-target tone-pill';
+  toneBtn.className = 'pill scroll-target tone-pill ham-tone-btn';
   toneBtn.setAttribute('role', 'button');
   const toneText = document.createElement('span');
   toneText.textContent = getToneLabel(TONES[store.get('toneIndex')]);
@@ -1192,6 +1196,15 @@ function createKeyboard() {
       row.appendChild(logo);
     }
 
+    if (rowOctave === 3) {
+      const pitch = document.createElement('div');
+      pitch.className = 'kb-pitch';
+      const updatePitch = () => { pitch.textContent = `A=${store.get('concertPitch')} Hz`; };
+      updatePitch();
+      store.on('concertPitch', updatePitch);
+      row.appendChild(pitch);
+    }
+
     const blacks = document.createElement('div');
     blacks.className = 'kb-blacks';
     BLACK_OFFSETS.forEach((b, idx) => {
@@ -1379,6 +1392,7 @@ function createSettingsScreen() {
   // ---- インストール ----
   const installBlock = document.createElement('div');
   installBlock.className = 'setting-block install-block';
+  installBlock.id = 'ham-set-install';
   const installBtn = document.createElement('button');
   installBtn.className = 'install-btn';
   const refreshInstallBtn = () => {
@@ -1398,11 +1412,12 @@ function createSettingsScreen() {
   window.addEventListener('namaham:install-availability-changed', refreshInstallBtn);
   store.on('lang', refreshInstallBtn);
   installBlock.appendChild(installBtn);
-  body.appendChild(installBlock);
+  // ※インストールブロックは最後尾に append する（本体の並び順は下記の各ブロックの後）
 
   // ---- 言語 ----
   const langBlock = document.createElement('div');
   langBlock.className = 'setting-block setting-block-inline';
+  langBlock.id = 'ham-set-lang';
   const langLabel = document.createElement('div');
   langLabel.className = 'setting-label setting-label-inline';
   langLabel.dataset.i18n = 'language';
@@ -1437,6 +1452,7 @@ function createSettingsScreen() {
   // ---- スリープ防止 ----
   const wakeBlock = document.createElement('div');
   wakeBlock.className = 'setting-block';
+  wakeBlock.id = 'ham-set-wake';
   const wakeRow = document.createElement('div');
   wakeRow.className = 'wake-row';
 
@@ -1486,6 +1502,7 @@ function createSettingsScreen() {
   // ---- コンサートピッチ ----
   const pitchBlock = document.createElement('div');
   pitchBlock.className = 'setting-block setting-block-inline';
+  pitchBlock.id = 'ham-set-pitch';
   const pitchLabel = document.createElement('div');
   pitchLabel.className = 'setting-label setting-label-inline';
   pitchLabel.textContent = t(store.get('lang'), 'concertPitch');
@@ -1516,6 +1533,7 @@ function createSettingsScreen() {
   // ---- テーマカラー ----
   const themeBlock = document.createElement('div');
   themeBlock.className = 'setting-block';
+  themeBlock.id = 'ham-set-theme';
   const themeLabel = document.createElement('div');
   themeLabel.className = 'setting-label';
   themeLabel.textContent = t(store.get('lang'), 'themeColor');
@@ -1546,6 +1564,49 @@ function createSettingsScreen() {
   themeBlock.appendChild(themeGrid);
   body.appendChild(themeBlock);
 
+  // ---- チュートリアル（案内ボタンの表示切替） ----
+  const tutorialBlock = document.createElement('div');
+  tutorialBlock.className = 'setting-block';
+  tutorialBlock.id = 'ham-set-tutorial';
+  const tutorialRow = document.createElement('div');
+  tutorialRow.className = 'wake-row';
+  const tutorialInfo = document.createElement('div');
+  const tutorialTitle = document.createElement('div');
+  tutorialTitle.className = 'wake-title';
+  tutorialTitle.textContent = t(store.get('lang'), 'tutorial');
+  const tutorialDesc = document.createElement('div');
+  tutorialDesc.className = 'wake-status';
+  tutorialDesc.textContent = t(store.get('lang'), 'tutorialBtn');
+  tutorialInfo.append(tutorialTitle, tutorialDesc);
+  const tutorialSwitch = document.createElement('label');
+  tutorialSwitch.className = 'switch';
+  const tutorialInput = document.createElement('input');
+  tutorialInput.type = 'checkbox';
+  const tutorialSlider = document.createElement('span');
+  tutorialSlider.className = 'switch-slider';
+  tutorialSwitch.append(tutorialInput, tutorialSlider);
+  tutorialRow.append(tutorialInfo, tutorialSwitch);
+  tutorialBlock.appendChild(tutorialRow);
+  body.appendChild(tutorialBlock);
+
+  const syncTutorialSwitch = () => {
+    const on = !(window.NamaTutorial && window.NamaTutorial.isButtonVisible && !window.NamaTutorial.isButtonVisible());
+    tutorialInput.checked = on;
+    tutorialSlider.classList.toggle('on', on);
+  };
+  syncTutorialSwitch();
+  tutorialInput.addEventListener('change', () => {
+    if (window.NamaTutorial && window.NamaTutorial.setButtonVisible) window.NamaTutorial.setButtonVisible(tutorialInput.checked);
+    tutorialSlider.classList.toggle('on', tutorialInput.checked);
+  });
+  store.on('lang', (lang) => {
+    tutorialTitle.textContent = t(lang, 'tutorial');
+    tutorialDesc.textContent = t(lang, 'tutorialBtn');
+  });
+
+  // ---- インストール（最下段） ----
+  body.appendChild(installBlock);
+
   const infoBody = document.createElement('div');
   infoBody.className = 'settings-body';
   infoBody.style.display = 'none';
@@ -1566,6 +1627,7 @@ function createSettingsScreen() {
 
   function show() {
     selectSettingsTab();
+    syncTutorialSwitch();
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('shown'));
   }
@@ -1796,6 +1858,26 @@ if (app) {
   app.appendChild(createBottomBar());
   app.appendChild(createSettingsScreen());
 }
+
+// =====================================================================
+// チュートリアル共通キット用の橋渡し（tutorial/config.js と対）
+// 画面は1つだけなのでページIDは 'main' 固定。設定画面は歯車タップで開く
+// ため、設定内を指す章では navigate で先に設定を開く。
+// =====================================================================
+window.NamaHamTutorialBridge = {
+  navigate: function (pageId) {
+    if (pageId === 'settings') {
+      window.dispatchEvent(new CustomEvent('namaham:open-settings'));
+    } else if (pageId === 'main') {
+      var closeBtn = document.querySelector('.settings-close');
+      if (closeBtn && document.querySelector('.settings-overlay.shown')) closeBtn.click();
+    }
+  },
+  currentPage: function () {
+    return document.querySelector('.settings-overlay.shown') ? 'settings' : 'main';
+  },
+  snapshotKeys: function () { return ['namaham_state_v1']; },
+};
 
 // AudioContext は初回操作まで遅延初期化（iOS Safari 対応）
 const initAudioOnce = () => {
