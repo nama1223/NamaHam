@@ -314,6 +314,8 @@ body {
   letter-spacing: 0.05em;
   pointer-events: none;
   z-index: 2;
+  /* 文字の下端から下の横線までの距離を NamaHam ロゴと揃える（フォントが小さい分だけ下へ寄せる） */
+  transform: translateY(calc((clamp(36px, 12vw, 72px) - clamp(15px, 4.6vw, 26px)) * 0.67));
 }
 .kb-key.active {
   background: var(--accent) !important;
@@ -730,7 +732,7 @@ body {
   <body>
     <div id="app"></div>
     <link rel="stylesheet" href="./tutorial/nama-tutorial.css?v=16" />
-    <script src="./tutorial/config.js?v=16"></script>
+    <script src="./tutorial/config.js?v=17"></script>
     <script src="./tutorial/nama-tutorial.js?v=16"></script>
     <script src="./app.js"></script>
     <script>
