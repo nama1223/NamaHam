@@ -21,10 +21,10 @@ window.NAMA_TUTORIAL_CONFIG = {
       ]
     },
     {
-      id: 'top', page: 'main', title: '上段の操作', desc: '移調・音色・持続音・音量・音域', icon: 'yay', since: 2,
+      id: 'top', page: 'main', title: '上段の操作', desc: '移調・音色・持続音・音量・音域', icon: 'yay', since: 3,
       steps: [
         { page: 'main', target: '.ham-transpose-btn', pose: 'point', text: '「移調」ナマ。タップすると音名の一覧が出ナマ。縦にスワイプしても変えられナマ。自分の楽器の調に合わせて、音の高さを移し替えナマ。' },
-        { page: 'main', target: '.ham-tone-btn', pose: 'point', text: '「音色」は6つありナマ。クラリネット、フルート、トランペット、オーボエ、ホルン、矩形波ナマ。タップで一覧、スワイプでも切り替えられナマ。' },
+        { page: 'main', target: '.ham-tone-btn', pose: 'point', text: '「音色」は8つありナマ。クラリネット、フルート、トランペット、オーボエ、ホルン、矩形波、正弦波、のこぎり波ナマ。タップで一覧、スワイプでも切り替えられナマ。' },
         { page: 'main', target: '.sustain-btn', mode: 'tap', pose: 'point', text: '「持続音」ナマ。押してみるナマ。オレンジ色に光ったらオンの合図ナマ。' },
         { page: 'main', target: '.keyboard', mode: 'tap', pose: 'point', text: 'この状態で鍵盤を押すと、指を離しても音が鳴り続けナマ。和音の響きをゆっくり確かめるのに便利ナマ。押してみるナマ。' },
         { page: 'main', target: '.sustain-btn', mode: 'tap', pose: 'point', text: '鳴り続けている音は、もう一度「持続音」を押すと止まりナマ。押してオフに戻すナマ。' },

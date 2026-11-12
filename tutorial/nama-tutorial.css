@@ -2,13 +2,21 @@
 #nt-btn {
   position: fixed; right: 14px; bottom: 14px; z-index: 900;
   width: 62px; height: 62px; padding: 0; border: none; border-radius: 50%;
-  background: #6ec6e8; cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  background: transparent; cursor: pointer;
+  box-shadow: none;
   touch-action: none; /* ドラッグ移動のため */
+  overflow: visible;
 }
-#nt-btn img { width: 100%; height: 100%; display: block; border-radius: 50%; }
+/* ボタン画像は円で切り抜かない。原画の円がそのままボタンの円になり、「？」や足などの
+   原画で円からはみ出している部分は、ボタンの外へそのままはみ出して見える */
+#nt-btn img {
+  width: 110%; height: 110%; display: block; border-radius: 0;
+  margin: -5% 0 0 -5%;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.35));
+  pointer-events: none;
+}
 #nt-btn .nt-badge {
-  position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px;
+  position: absolute; top: -4px; left: -4px; right: auto; min-width: 20px; height: 20px;
   border-radius: 10px; background: #e53e3e; color: #fff;
   font-size: 11px; font-weight: 700; line-height: 20px; text-align: center;
   padding: 0 5px; box-sizing: border-box; border: 2px solid #fff;
