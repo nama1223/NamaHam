@@ -15,7 +15,7 @@ window.NAMA_TUTORIAL_CONFIG = {
     {
       id: 'intro', page: 'main', title: 'はじめに', desc: '鍵盤の弾き方と、この案内の使い方', icon: 'wave', since: 1,
       steps: [
-        { page: 'main', pose: 'wave', text: 'やあ！生物（ナマモノ）ナマ。このアプリの案内役を仰せつかってナマ。先に言っておくと、この案内はいつでも✕ボタンでやめられるし、やめた後も右下のボタンから見直せナマ。気楽にどうぞ。' },
+        { page: 'main', pose: 'wave', text: 'やあ！生物（ナマモノ）ナマ。このアプリの案内役を仰せつかってナマ。先に言っておくと、この案内はいつでも✕ボタンでやめられるし、やめた後も{{btnPos}}のボタンから見直せナマ。気楽にどうぞ。' },
         { page: 'main', target: '.keyboard', mode: 'tap', pose: 'point', text: 'ここが鍵盤ナマ。押すと音が出ナマ。いくつか同時に押すと和音も鳴らせナマ。試しに押してみるナマ。' },
         { page: 'main', target: '.gear-btn', pose: 'point', text: '左上の歯車は設定ナマ。コンサートピッチやテーマカラーはここから変えナマ。最後の章で案内しナマ。' }
       ]
@@ -50,7 +50,7 @@ window.NAMA_TUTORIAL_CONFIG = {
         { page: 'settings', target: '#ham-set-theme', pose: 'point', text: '「テーマカラー」ナマ。画面の色合いを6つから選べナマ。' },
         { page: 'settings', target: '#ham-set-wake', pose: 'point', text: '「スリープ防止」をオンにすると、使っている間は画面が暗くならナマ。' },
         { page: 'settings', target: '#ham-set-lang', pose: 'point', text: '言語の切り替えナマ。Englishにすると、アプリの名前も「NamaHarmony」に変わりナマ。' },
-        { page: 'settings', target: '#ham-set-tutorial', mode: 'free', pose: 'point', text: 'この案内のボタンの表示・非表示はここナマ。オフにすると右下のボタンが消えナマ。消してしまっても、ここに戻ればいつでも出せナマ。' },
+        { page: 'settings', target: '#ham-set-tutorial', mode: 'free', pose: 'point', text: 'この案内のボタンの表示・非表示はここナマ。オフにすると{{btnPos}}のボタンが消えナマ。消してしまっても、ここに戻ればいつでも出せナマ。' },
         { page: 'settings', target: '#ham-set-install', pose: 'point', text: '一番下はインストールのボタン ナマ。このアプリをホーム画面に追加できナマ。NamaSoundPlusから開いている時は、単独で入れるかの確認が出ナマ。閉じる時は右上の×ナマ。' }
       ]
     }
