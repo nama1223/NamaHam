@@ -1865,6 +1865,7 @@ if (app) {
 // ため、設定内を指す章では navigate で先に設定を開く。
 // =====================================================================
 window.NamaHamTutorialBridge = {
+  language: function () { return getLang(); },
   navigate: function (pageId) {
     if (pageId === 'settings') {
       window.dispatchEvent(new CustomEvent('namaham:open-settings'));

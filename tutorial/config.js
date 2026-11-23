@@ -54,5 +54,194 @@ window.NAMA_TUTORIAL_CONFIG = {
         { page: 'settings', target: '#ham-set-install', pose: 'point', text: '一番下はインストールのボタン ナマ。このアプリをホーム画面に追加できナマ。NamaSoundPlusから開いている時は、単独で入れるかの確認が出ナマ。閉じる時は右上の×ナマ。' }
       ]
     }
-  ]
+  ],
+  en: {
+    introTitle: "How to Use NamaHarmony",
+    introText: "Let's walk through how to use this app, touching the real screen as we go, nama. It takes about a minute, nama.",
+    chapters: [
+      {
+        id: "intro",
+        page: "main",
+        title: "First Steps",
+        desc: "How to play the keyboard, and how to use this guide",
+        icon: "wave",
+        since: 1,
+        steps: [
+          {
+            page: "main",
+            pose: "wave",
+            text: "Hi! I'm Nama, a living creature (namamono) — your guide for this app, nama. First, a quick note: you can stop this guide anytime with the ✕ button, and you can always come back to it from the button at {{btnPos}}, nama. Take it easy, nama."
+          },
+          {
+            page: "main",
+            target: ".keyboard",
+            mode: "tap",
+            pose: "point",
+            text: "This is the keyboard, nama. Tap it and it sounds, nama. Tap several keys together and you can play chords, nama. Let's try tapping a few, nama."
+          },
+          {
+            page: "main",
+            target: ".gear-btn",
+            pose: "point",
+            text: "The gear at the top left is Settings, nama. You can change the concert pitch and theme color from there, nama. We'll look at it in the last chapter, nama."
+          }
+        ]
+      },
+      {
+        id: "top",
+        page: "main",
+        title: "Top Row",
+        desc: "Xpose, tone, sustain, volume, and range",
+        icon: "yay",
+        since: 3,
+        steps: [
+          {
+            page: "main",
+            target: ".ham-transpose-btn",
+            pose: "point",
+            text: "'Xpose', nama. Tap it and a list of note names appears, nama. You can also swipe up and down to change it, nama. Let's match it to your instrument's key and shift the pitch, nama."
+          },
+          {
+            page: "main",
+            target: ".ham-tone-btn",
+            pose: "point",
+            text: "'Tone' comes in 8, nama: Clarinet, Flute, Trumpet, Oboe, Horn, Square Wave, Sine Wave, and Saw Wave, nama. Tap for the list, or swipe to switch, nama."
+          },
+          {
+            page: "main",
+            target: ".sustain-btn",
+            mode: "tap",
+            pose: "point",
+            text: "'Sustain', nama. Let's tap it, nama. When it glows orange, it's on, nama."
+          },
+          {
+            page: "main",
+            target: ".keyboard",
+            mode: "tap",
+            pose: "point",
+            text: "While it's on, a key keeps sounding even after you lift your finger, nama. It's handy for listening to a chord's ring slowly, nama. Let's try pressing a key, nama."
+          },
+          {
+            page: "main",
+            target: ".sustain-btn",
+            mode: "tap",
+            pose: "point",
+            text: "A note that keeps ringing stops when you tap 'Sustain' once more, nama. Let's tap it and switch it back off, nama."
+          },
+          {
+            page: "main",
+            target: ".vol-wrap",
+            mode: "free",
+            pose: "point",
+            bubblePos: "bottom",
+            text: "Volume, nama. Tap the speaker icon or the number and a slider appears, nama. Swiping up and down also turns it up or down, nama. Let's give it a try, nama."
+          },
+          {
+            page: "main",
+            target: ".range-wrap",
+            mode: "free",
+            pose: "point",
+            text: "'Range', nama. The ▼▲ buttons shift the whole keyboard up or down by one octave at a time (from 2 up to 2 down), nama. Swiping works too, nama."
+          }
+        ]
+      },
+      {
+        id: "harmony",
+        page: "main",
+        title: "Harmony and Key",
+        desc: "Play Root, Key (just-tuning pitch), and Just / Equal",
+        icon: "thinking",
+        since: 1,
+        steps: [
+          {
+            page: "main",
+            target: ".root-btn",
+            mode: "tap",
+            pose: "point",
+            text: "'Play Root', nama. Tap it and it waits, glowing orange, nama. Let's tap it, nama."
+          },
+          {
+            page: "main",
+            target: ".keyboard",
+            mode: "tap",
+            pose: "point",
+            text: "Now press one key, and that note becomes the root of the 'Key' (no sound plays, and the waiting ends), nama. Use it when you want to set the just-tuning reference by playing it, nama."
+          },
+          {
+            page: "main",
+            target: ".root-btn",
+            pose: "point",
+            text: "To cancel the wait, tap 'Play Root' once more before pressing a key, nama."
+          },
+          {
+            page: "main",
+            target: ".key-pill",
+            pose: "point",
+            text: "'Key', nama. This is where the note that sets the just-tuning pitch reference lives, nama. It's usually 'Auto', which reads the root and chord name from the chord you played and shows them, nama. Tap it to pick one by hand from the list, or go back to Auto, nama. Swiping switches it too, nama."
+          },
+          {
+            page: "main",
+            target: ".temp-btn",
+            mode: "tap",
+            pose: "point",
+            text: "The button at the right end switches 'Just' and 'Equal', nama. Just is just intonation, Equal is equal temperament, nama. Let's tap it, nama."
+          },
+          {
+            page: "main",
+            target: ".temp-btn",
+            mode: "tap",
+            pose: "point",
+            text: "Tap it once more and it goes back, nama."
+          }
+        ]
+      },
+      {
+        id: "settings",
+        page: "settings",
+        title: "Settings",
+        desc: "Concert pitch, theme, Keep Awake, language, and more",
+        icon: "question",
+        since: 1,
+        steps: [
+          {
+            page: "settings",
+            target: "#ham-set-pitch",
+            pose: "point",
+            text: "'Concert Pitch', nama. You can change the reference frequency for A from 415 to 466 Hz, nama. The current value is also shown faintly on the third row of the keyboard, nama."
+          },
+          {
+            page: "settings",
+            target: "#ham-set-theme",
+            pose: "point",
+            text: "'Theme Color', nama. You can pick the screen's color from 6, nama."
+          },
+          {
+            page: "settings",
+            target: "#ham-set-wake",
+            pose: "point",
+            text: "Turn 'Keep Awake' on and the screen won't go dark while you're using the app, nama."
+          },
+          {
+            page: "settings",
+            target: "#ham-set-lang",
+            pose: "point",
+            text: "Language switching, nama. The app's name in English is 'NamaHarmony', nama. Switch back to Japanese anytime from here, nama."
+          },
+          {
+            page: "settings",
+            target: "#ham-set-tutorial",
+            mode: "free",
+            pose: "point",
+            text: "This guide's button can be shown or hidden here, nama. Turn it off and the button at {{btnPos}} disappears, nama. Even if you hide it, come back here anytime to bring it back, nama."
+          },
+          {
+            page: "settings",
+            target: "#ham-set-install",
+            pose: "point",
+            text: "At the very bottom is the install button, nama. It adds this app to your home screen, nama. If you're opening it from NamaSound+, you'll be asked whether to install it on its own, nama. To close, tap the × at the top right, nama."
+          }
+        ]
+      }
+    ]
+  }
 };
